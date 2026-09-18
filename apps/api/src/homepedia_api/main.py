@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import OperationalError
 
 from homepedia_api.db import create_database_engine
-from homepedia_api.errors import register_error_handlers
+from homepedia_api.errors import PROBLEM_RESPONSE, register_error_handlers
 from homepedia_api.routes import health, territories
 from homepedia_api.settings import get_settings
 
@@ -41,6 +41,7 @@ def create_app() -> FastAPI:
         version="0.1.0",
         description="Exploration immobilière territoriale.",
         lifespan=_lifespan,
+        responses={500: PROBLEM_RESPONSE},
     )
     register_error_handlers(app)
     app.include_router(health.router)

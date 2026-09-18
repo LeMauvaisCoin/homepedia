@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 
 from homepedia_api.db import ConnectionDep
+from homepedia_api.errors import PROBLEM_RESPONSE
 
 router = APIRouter(tags=["santé"])
 
@@ -22,6 +23,7 @@ async def get_health() -> Health:
     "/health/ready",
     operation_id="getReadiness",
     summary="Vérifier que l'API atteint la base de données",
+    responses={503: PROBLEM_RESPONSE},
 )
 async def get_readiness(connection: ConnectionDep) -> Health:
     await connection.execute(select(1))

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Query
 from pydantic import BaseModel, Field
 
 from homepedia_api.db import ConnectionDep
-from homepedia_api.errors import PROBLEM_MEDIA_TYPE, Problem
+from homepedia_api.errors import PROBLEM_RESPONSE
 from homepedia_api.repositories import territories as repository
 
 router = APIRouter(prefix="/v1", tags=["territoires"])
@@ -37,9 +37,7 @@ class TerritoryPage(BaseModel):
     "/territories",
     operation_id="listTerritories",
     summary="Lister les territoires",
-    responses={
-        422: {"model": Problem, "content": {PROBLEM_MEDIA_TYPE: {}}},
-    },
+    responses={422: PROBLEM_RESPONSE, 503: PROBLEM_RESPONSE},
 )
 async def list_territories(
     connection: ConnectionDep,

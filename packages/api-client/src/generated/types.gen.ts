@@ -133,6 +133,15 @@ export type GetHealthData = {
     url: '/health';
 };
 
+export type GetHealthErrors = {
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetHealthError = GetHealthErrors[keyof GetHealthErrors];
+
 export type GetHealthResponses = {
     /**
      * Successful Response
@@ -148,6 +157,19 @@ export type GetReadinessData = {
     query?: never;
     url: '/health/ready';
 };
+
+export type GetReadinessErrors = {
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+    /**
+     * Service Unavailable
+     */
+    503: Problem;
+};
+
+export type GetReadinessError = GetReadinessErrors[keyof GetReadinessErrors];
 
 export type GetReadinessResponses = {
     /**
@@ -191,6 +213,14 @@ export type ListTerritoriesErrors = {
      * Unprocessable Content
      */
     422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+    /**
+     * Service Unavailable
+     */
+    503: Problem;
 };
 
 export type ListTerritoriesError = ListTerritoriesErrors[keyof ListTerritoriesErrors];

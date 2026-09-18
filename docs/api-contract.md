@@ -34,6 +34,10 @@ offset }`.
 - Erreurs au format `application/problem+json` (RFC 9457) via
   `homepedia_api.errors.Problem`, déclarées dans `responses` pour apparaître
   dans le contrat.
+- Les pannes suivent le même format : 503 quand la base est injoignable
+  (`responses={503: PROBLEM_RESPONSE}` sur chaque route qui l'interroge), 500
+  pour toute exception inattendue, déclaré une fois pour toute l'application.
+  Le détail de l'exception va dans les logs, jamais dans la réponse.
 - L'export OpenAPI fonctionne hors ligne : `create_app()` ne lit ni
   configuration ni base de données. `bun run generate` régénère aussi
   `tables.py` et demande donc la base locale

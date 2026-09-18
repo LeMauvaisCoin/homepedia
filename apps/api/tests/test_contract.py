@@ -1,7 +1,11 @@
 import pytest
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
+from sqlalchemy.exc import OperationalError
 
+from homepedia_api.db import get_connection
 from homepedia_api.main import create_app
 from homepedia_api.settings import Settings
 
@@ -30,6 +34,40 @@ def test_unknown_route_returns_a_structured_problem(offline_client: TestClient) 
     assert response.json()["title"] == "Not Found"
 
 
+def _app_failing_with(error: Exception) -> FastAPI:
+    def fail() -> None:
+        raise error
+
+    app = create_app()
+    app.dependency_overrides[get_connection] = fail
+    return app
+
+
+def test_unexpected_error_returns_a_structured_problem() -> None:
+    app = _app_failing_with(RuntimeError("s3cret"))
+    app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173"])
+
+    response = TestClient(app).get("/health/ready", headers={"Origin": "http://localhost:5173"})
+
+    assert response.status_code == 500
+    assert response.headers["content-type"] == "application/problem+json"
+    assert response.json()["title"] == "Erreur interne"
+    assert "s3cret" not in response.text
+    # Sans cet en-tête, le navigateur masque la réponse au frontend.
+    assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
+
+
+def test_unreachable_database_returns_503() -> None:
+    app = _app_failing_with(OperationalError("SELECT 1", {}, Exception("connection refused")))
+
+    response = TestClient(app).get("/health/ready")
+
+    assert response.status_code == 503
+    assert response.headers["content-type"] == "application/problem+json"
+    assert response.json()["title"] == "Service indisponible"
+    assert "connection refused" not in response.text
+
+
 def test_contract_exports_offline_with_stable_operation_ids() -> None:
     schema = create_app().openapi()
 
@@ -37,6 +75,15 @@ def test_contract_exports_offline_with_stable_operation_ids() -> None:
         operation["operationId"] for path in schema["paths"].values() for operation in path.values()
     }
     assert operation_ids == {"getHealth", "getReadiness", "listTerritories"}
+
+
+def test_contract_declares_the_server_problems() -> None:
+    paths = create_app().openapi()["paths"]
+
+    for path in ("/health/ready", "/v1/territories"):
+        responses = paths[path]["get"]["responses"]
+        assert "application/problem+json" in responses["500"]["content"]
+        assert "application/problem+json" in responses["503"]["content"]
 
 
 def test_missing_database_url_fails_at_startup(monkeypatch: pytest.MonkeyPatch) -> None:
