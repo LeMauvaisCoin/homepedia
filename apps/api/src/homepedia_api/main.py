@@ -15,7 +15,7 @@ from homepedia_api.settings import get_settings
 @asynccontextmanager
 async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
-    engine = create_database_engine(str(settings.database_url))
+    engine = create_database_engine(str(settings.database_url.get_secret_value()))
     app.state.engine = engine
     try:
         if settings.environment == "local":

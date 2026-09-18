@@ -54,3 +54,14 @@ def test_invalid_database_url_does_not_leak_its_value(monkeypatch: pytest.Monkey
 
     assert "database_url" in str(error.value)
     assert "s3cret" not in str(error.value)
+
+
+def test_settings_never_display_the_database_password(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:s3cret@host/db")
+
+    settings = Settings(_env_file=None)
+
+    assert "s3cret" not in repr(settings)
+    assert "s3cret" not in str(settings.database_url)
+    assert "s3cret" not in settings.model_dump_json()
+    assert "s3cret" in str(settings.database_url.get_secret_value())

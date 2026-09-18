@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Annotated, Literal
 
-from pydantic import BeforeValidator, Field, PostgresDsn
+from pydantic import BeforeValidator, Field, PostgresDsn, Secret
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
@@ -18,7 +18,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", hide_input_in_errors=True)
 
     environment: Literal["local", "test", "production"] = "local"
-    database_url: PostgresDsn
+    # `Secret` masque le mot de passe dans `repr(settings)`, donc dans les logs et les tracebacks.
+    database_url: Secret[PostgresDsn]
     cors_allowed_origins: Annotated[list[str], NoDecode, BeforeValidator(_split_origins)] = Field(
         default_factory=list
     )

@@ -21,7 +21,8 @@ modifier à la main. Changer le schéma dans `supabase/migrations`, puis
 
 def main() -> None:
     target = Path(sys.argv[1])
-    url = make_url(str(get_settings().database_url)).set(drivername="postgresql+psycopg")
+    database_url = get_settings().database_url.get_secret_value()
+    url = make_url(str(database_url)).set(drivername="postgresql+psycopg")
     engine = create_engine(url)
     metadata = MetaData()
     with engine.connect() as connection:
