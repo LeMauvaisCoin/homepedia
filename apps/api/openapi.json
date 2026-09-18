@@ -1,0 +1,374 @@
+{
+  "components": {
+    "schemas": {
+      "Health": {
+        "properties": {
+          "status": {
+            "const": "ok",
+            "default": "ok",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "title": "Health",
+        "type": "object"
+      },
+      "InvalidParameter": {
+        "properties": {
+          "location": {
+            "description": "Emplacement du paramètre fautif.",
+            "examples": [
+              "query.limit"
+            ],
+            "title": "Location",
+            "type": "string"
+          },
+          "message": {
+            "examples": [
+              "Input should be less than or equal to 100"
+            ],
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "location",
+          "message"
+        ],
+        "title": "InvalidParameter",
+        "type": "object"
+      },
+      "Problem": {
+        "description": "Erreur structurée, au format RFC 9457.",
+        "properties": {
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/InvalidParameter"
+            },
+            "title": "Errors",
+            "type": "array"
+          },
+          "status": {
+            "examples": [
+              422
+            ],
+            "title": "Status",
+            "type": "integer"
+          },
+          "title": {
+            "examples": [
+              "Paramètres invalides"
+            ],
+            "title": "Title",
+            "type": "string"
+          },
+          "type": {
+            "default": "about:blank",
+            "description": "Identifiant du type d'erreur.",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "status"
+        ],
+        "title": "Problem",
+        "type": "object"
+      },
+      "Territory": {
+        "properties": {
+          "code": {
+            "description": "Code officiel géographique, conservé en chaîne (zéros initiaux).",
+            "examples": [
+              "01053"
+            ],
+            "title": "Code",
+            "type": "string"
+          },
+          "department_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "01"
+            ],
+            "title": "Department Code"
+          },
+          "latitude": {
+            "examples": [
+              46.2027
+            ],
+            "title": "Latitude",
+            "type": "number"
+          },
+          "level": {
+            "enum": [
+              "commune",
+              "departement",
+              "region"
+            ],
+            "title": "Level",
+            "type": "string"
+          },
+          "longitude": {
+            "examples": [
+              5.2469
+            ],
+            "title": "Longitude",
+            "type": "number"
+          },
+          "name": {
+            "examples": [
+              "Bourg-en-Bresse"
+            ],
+            "title": "Name",
+            "type": "string"
+          },
+          "population": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Population municipale.",
+            "examples": [
+              42372
+            ],
+            "title": "Population"
+          },
+          "region_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "84"
+            ],
+            "title": "Region Code"
+          }
+        },
+        "required": [
+          "code",
+          "level",
+          "name",
+          "department_code",
+          "region_code",
+          "population",
+          "longitude",
+          "latitude"
+        ],
+        "title": "Territory",
+        "type": "object"
+      },
+      "TerritoryPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Territory"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "total": {
+            "description": "Nombre de territoires correspondant aux filtres.",
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "TerritoryPage",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Exploration immobilière territoriale.",
+    "title": "Homepedia API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Vérifier que l'API répond",
+        "tags": [
+          "santé"
+        ]
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "operationId": "getReadiness",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Vérifier que l'API atteint la base de données",
+        "tags": [
+          "santé"
+        ]
+      }
+    },
+    "/v1/territories": {
+      "get": {
+        "operationId": "listTerritories",
+        "parameters": [
+          {
+            "description": "Niveau territorial.",
+            "in": "query",
+            "name": "level",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "commune",
+                    "departement",
+                    "region"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Niveau territorial.",
+              "title": "Level"
+            }
+          },
+          {
+            "description": "Recherche sur le nom.",
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Recherche sur le nom.",
+              "examples": [
+                "lyon"
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TerritoryPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              },
+              "application/problem+json": {}
+            },
+            "description": "Unprocessable Content"
+          }
+        },
+        "summary": "Lister les territoires",
+        "tags": [
+          "territoires"
+        ]
+      }
+    }
+  }
+}
