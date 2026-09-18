@@ -41,7 +41,7 @@ Une seule fois par poste :
 
 ```sh
 bunx supabase login
-bunx supabase link --project-ref <ref-du-projet> --workdir .
+bunx supabase link --project-ref wrahjubnsmbfmgnrepha --workdir .
 ```
 
 Puis, depuis `main` à jour :
@@ -51,9 +51,34 @@ bun run supabase:deploy:plan   # liste les migrations en attente, sans rien appl
 bun run supabase:deploy        # applique les migrations, puis pousse config.toml
 ```
 
-La CLI affiche ce qu'elle va appliquer et demande confirmation à chaque étape.
+La CLI affiche les changements et demande confirmation dans un terminal
+interactif. En exécution non interactive, elle peut les accepter automatiquement :
+examiner aussi `bunx supabase config diff` avant de pousser la configuration.
 Le seed n'est pas poussé (`--include-seed` n'est jamais utilisé). L'état du
 lien (`supabase/.temp/`) reste local et ignoré par Git.
 
-Le projet hébergé n'existe pas encore : il sera créé avec
+## Projet hébergé
+
+Le projet [homepedia](https://supabase.com/dashboard/project/wrahjubnsmbfmgnrepha)
+est hébergé dans l'organisation **Homepedia**, en **Europe / Irlande
+(`eu-west-1`)**, sur PostgreSQL 17 et l'offre gratuite. Sa référence publique
+est `wrahjubnsmbfmgnrepha` ; ce n'est pas un identifiant secret.
+
+La Data API est désactivée. La connexion applicative reste réservée à
+FastAPI via `DATABASE_URL`, conservée dans l'environnement du serveur.
+Le développement local garde sa base et son jeu d'exemple indépendants.
+
+La migration `20260918120000_example_territories.sql` a été appliquée lors
+de l'initialisation du projet : PostGIS est installé, `public.territories`
+active la RLS sans policy et la table reste vide. Aucun seed n'a été poussé.
+Les options `enabled = false` des services dans `config.toml` pilotent la
+pile locale ; elles ne garantissent pas l'arrêt de chaque service hébergé.
+La désactivation de la Data API distante est vérifiée dans le dashboard
+(Integrations → Data API → Settings). La CLI 2.117.0 signale encore
+`api.enabled = true` dans `config diff` alors que ce réglage y est désactivé.
+Aucune preview automatique par PR ni aucun déploiement GitHub n'est activé.
+
+Le lien CLI reste dans `supabase/.temp/`, ignoré par Git. Le mot de passe de
+la base ne doit pas être ajouté à la PR ou aux fichiers d'exemple.
+Le déploiement de l'API et du frontend reste suivi dans
 [LEM-34](https://linear.app/lemauvaiscoin/issue/LEM-34).
