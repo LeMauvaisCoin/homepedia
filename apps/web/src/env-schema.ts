@@ -9,7 +9,7 @@ export function parseClientEnv(runtimeEnv: RuntimeEnv) {
   return createEnv({
     clientPrefix: "VITE_",
     client: {
-      VITE_API_URL: z.url(),
+      VITE_API_URL: z.union([z.url(), z.literal("/api")]),
     },
     runtimeEnv,
     emptyStringAsUndefined: true,

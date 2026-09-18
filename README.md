@@ -30,10 +30,11 @@ Prérequis : [Bun](https://bun.sh) 1.4.0, Node.js 24, [uv](https://docs.astral.s
 bun install              # dépendances JavaScript et hooks Git
 bun run setup            # fichiers .env locaux et environnement Python
 bun run supabase:start   # PostgreSQL/PostGIS local : migrations + jeu d’exemple
-bun run dev              # API sur :8000, frontend sur :5173
+bun run dev              # URL HTTPS locales et ports libres avec Portless
+bun run dev:tailnet      # accès depuis le Mac via Tailscale
 ```
 
-<http://localhost:5173> affiche alors les douze communes du jeu d’exemple, servies par l’API depuis la base locale.
+Ouvrir l’URL affichée pour `homepedia` (`bun run dev:urls` pour la retrouver) : elle affiche les douze communes du jeu d’exemple. Pour le premier démarrage et les URL par worktree, voir le [guide local](docs/local-development.md).
 
 | Chemin                | Contenu                                                  |
 | --------------------- | -------------------------------------------------------- |

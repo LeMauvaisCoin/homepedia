@@ -22,22 +22,75 @@ La CLI Supabase, Turborepo, Oxlint et Playwright sont installés par
 bun install              # dépendances JavaScript et hooks Git
 bun run setup            # apps/*/.env depuis .env.example, puis uv sync
 bun run supabase:start   # PostgreSQL local : migrations + jeu d'exemple
-bun run dev              # API et frontend, avec rechargement
+bun run dev              # API et frontend via Portless, avec rechargement
 ```
 
-**Premier résultat attendu** : <http://localhost:5173> affiche un tableau de
+**Premier résultat attendu** : l’URL `homepedia` imprimée par Portless affiche un tableau de
 douze communes, d'Annecy à Valence, avec « 12 territoires — page 1 sur 3 ».
 La recherche « lyon » ne garde que Lyon (69123) et s'inscrit dans l'URL
-(`?q=lyon`). Côté API, <http://localhost:8000/v1/territories?limit=2> renvoie
-Annecy puis Aurillac avec `"total": 12`, et <http://localhost:8000/docs>
+(`?q=lyon`). Côté API, le chemin `/api/v1/territories?limit=2` sur cette même URL renvoie
+Annecy puis Aurillac avec `"total": 12`, et le chemin `/docs` sur l’URL locale `api.homepedia`
 présente le contrat OpenAPI.
+
+## Portless et accès depuis le Mac
+
+Portless **0.15.6** attribue un port libre à chaque application. Le proxy local
+HTTPS utilise le port non privilégié `1355`. Les noms sont
+`homepedia.localhost` et `api.homepedia.localhost` ; dans un worktree lié,
+Portless ajoute le nom de branche normalisé devant chacun. Utiliser les URL
+imprimées, ou `bun run dev:urls`, plutôt que des ports d’application fixes.
+
+Au premier démarrage sur une nouvelle machine, lancer une fois dans un terminal
+interactif `bunx --no-install portless proxy start --port 1355 --https` pour
+créer et approuver l’autorité de certification locale. Cette étape peut
+demander sudo. L’accès Tailscale utilise son propre certificat HTTPS, déjà
+reconnu par le navigateur du Mac.
+
+Pour accéder au frontend depuis une autre machine connectée au même tailnet :
+
+```sh
+bun run dev:tailnet
+# Équivalent :
+PORTLESS_TAILSCALE=1 bun run dev
+```
+
+Ouvrir l’URL « Tailscale » affichée pour `homepedia`. Portless choisit un port
+HTTPS disponible sur `dev-tower` et conserve les autres partages. Le port peut
+changer au prochain lancement. Tailscale doit être installé, connecté et
+configuré pour HTTPS sur le serveur ; le Mac doit être connecté au même tailnet.
+
+Le navigateur appelle `/api` sur cette même origine. Vite retire ce préfixe et
+transmet la requête à l’URL fournie par `portless get api.homepedia`, dans le
+même worktree. `changeOrigin` permet au proxy Portless de choisir l’API et
+`NODE_EXTRA_CA_CERTS`, fourni par Portless, valide son certificat local. L’API
+n’a pas de partage Tailscale séparé. Aucun ajout CORS n’est nécessaire.
+
+En mode Portless, `/api` remplace la valeur `VITE_API_URL` du fichier `.env`
+pour éviter que le Mac appelle son propre localhost. `DEV_API_URL` permet de
+remplacer la cible interne du proxy, via l’environnement ou `apps/web/.env.local`.
+Le build, le preview et les tests E2E conservent leur `VITE_API_URL` explicite.
+Pour lancer directement les serveurs sans Portless, utiliser `bun run dev:app`
+dans chaque application : le frontend revient à `5173`, l’API à `8000`.
+
+`bun run dev:doctor` vérifie le proxy et `bun run dev:urls` affiche les routes.
+Arrêter le processus `dev` avec Ctrl-C supprime ses routes et son partage
+Tailscale. Le proxy commun reste disponible pour les autres projets. Ne pas
+lancer `tailscale serve reset`, `portless clean` ou `portless proxy stop` pour
+arrêter seulement Homepedia.
+
+Le patch `patches/portless@0.15.6.patch`, repris de Wondday, sérialise les
+inscriptions et suppressions Tailscale entre projets et worktrees via
+`~/.portless/tailscale.lock`. Il retente les conflits transitoires de configuration.
+`bun install` l’applique automatiquement. En cas d’expiration du verrou, vérifier
+le processus propriétaire avant d’intervenir ; un verrou vide après un arrêt
+brutal ne doit être retiré qu’une fois les processus Portless concernés arrêtés.
 
 ## Applications
 
 | Chemin                | Application                               | Démarrage seul           | Adresse locale                                          |
 | --------------------- | ----------------------------------------- | ------------------------ | ------------------------------------------------------- |
-| `apps/web`            | Frontend React/Vite (SPA)                 | `bun run dev:web`        | <http://localhost:5173>                                 |
-| `apps/api`            | API FastAPI                               | `bun run dev:api`        | <http://localhost:8000>                                 |
+| `apps/web`            | Frontend React/Vite (SPA)                 | `bun run dev:web`        | URL Portless `homepedia`                                |
+| `apps/api`            | API FastAPI                               | `bun run dev:api`        | URL Portless `api.homepedia`                            |
 | `supabase`            | PostgreSQL 17 + PostGIS, Studio           | `bun run supabase:start` | base `127.0.0.1:55322`, Studio <http://127.0.0.1:55323> |
 | `packages/api-client` | Client TypeScript généré (pas de serveur) | `bun run generate`       | —                                                       |
 
@@ -94,7 +147,7 @@ suivantes en demanderont un lorsqu'elles seront livrées :
 
 | Fichier         | Variables                                             | Validation                                                           |
 | --------------- | ----------------------------------------------------- | -------------------------------------------------------------------- |
-| `apps/web/.env` | `VITE_API_URL`                                        | T3 Env + Zod, au `vite dev`/`vite build` et au chargement de la page |
+| `apps/web/.env` | `VITE_API_URL`, `DEV_API_URL` (proxy local optionnel) | T3 Env + Zod, au `vite dev`/`vite build` et au chargement de la page |
 | `apps/api/.env` | `ENVIRONMENT`, `DATABASE_URL`, `CORS_ALLOWED_ORIGINS` | Pydantic Settings, au démarrage de l'API                             |
 
 Seules des valeurs publiques préfixées `VITE_` vont dans le frontend : elles

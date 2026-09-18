@@ -1,0 +1,159 @@
+diff --git a/dist/cli.js b/dist/cli.js
+index 648ea06770ed30d1f527478f0889bb047e2a588c..7c4d9f5e89682ca6a7d7b0e3eba4bf0f11a7e736 100755
+--- a/dist/cli.js
++++ b/dist/cli.js
+@@ -852,6 +852,65 @@ function untrustCAWSL(stateDir, caCertPath) {
+ 
+ // src/tailscale.ts
+ import { spawnSync } from "child_process";
++import * as tailscaleFs from "node:fs";
++import * as tailscalePath from "node:path";
++// Tailscale Serve is shared by all worktrees, independently of PORTLESS_STATE_DIR.
++function withTailscaleLock(action) {
++  const dir = tailscalePath.join(resolveUserHome(), ".portless");
++  const lock = tailscalePath.join(dir, "tailscale.lock");
++  const owner = tailscalePath.join(lock, String(process.pid));
++  tailscaleFs.mkdirSync(dir, { recursive: true });
++  const deadline = Date.now() + 120000;
++  while (true) {
++    try {
++      tailscaleFs.mkdirSync(lock);
++      break;
++    } catch (err) {
++      if (err.code !== "EEXIST") throw err;
++      // Only the contender that removes the dead owner's token may remove its lock.
++      try {
++        const owners = tailscaleFs.readdirSync(lock);
++        if (owners.length === 1 && /^[1-9][0-9]*$/.test(owners[0])) {
++          let dead = false;
++          try {
++            process.kill(Number(owners[0]), 0);
++          } catch (error) {
++            dead = error.code === "ESRCH";
++          }
++          if (dead) {
++            tailscaleFs.unlinkSync(tailscalePath.join(lock, owners[0]));
++            tailscaleFs.rmdirSync(lock);
++            continue;
++          }
++        }
++      } catch (error) {
++        if (error.code !== "ENOENT") throw error;
++      }
++      if (Date.now() >= deadline) {
++        throw new Error(`Timed out waiting for Tailscale lock: ${lock}`);
++      }
++      Atomics.wait(
++        new Int32Array(new SharedArrayBuffer(4)),
++        0,
++        0,
++        25 + Math.random() * 25,
++      );
++    }
++  }
++  try {
++    tailscaleFs.writeFileSync(owner, "");
++    return action();
++  } finally {
++    tailscaleFs.rmSync(owner, { force: true });
++    tailscaleFs.rmdirSync(lock);
++  }
++}
++function isTailscaleConfigConflict(message) {
++  return /etag mismatch|another client is changing the serve config/i.test(
++    message,
++  );
++}
++
+ var TAILSCALE_BINARY = "tailscale";
+ var TAILSCALE_COMMAND_TIMEOUT_MS = 3e4;
+ var PREFERRED_SERVE_PORTS = [443, 8443, 8444, 8445, 8446, 8447, 8448, 8449, 8450];
+@@ -1087,7 +1146,22 @@ function registerFunnel(localPort, httpsPort, options) {
+ function unregisterTailscale(route) {
+   if (!route.tailscaleHttpsPort) return;
+   const mode = route.tailscaleFunnel ? "funnel" : "serve";
+-  unregister(mode, route.tailscaleHttpsPort, { ignoreMissing: true });
++  withTailscaleLock(() => {
++    for (let attempt = 1; ; attempt++) {
++      try {
++        unregister(mode, route.tailscaleHttpsPort, { ignoreMissing: true });
++        return;
++      } catch (err) {
++        if (attempt >= 5 || !isTailscaleConfigConflict(String(err))) throw err;
++        Atomics.wait(
++          new Int32Array(new SharedArrayBuffer(4)),
++          0,
++          0,
++          50 * attempt,
++        );
++      }
++    }
++  });
+ }
+ function formatTailscaleUrl(baseUrl, httpsPort) {
+   const trimmed = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+@@ -5219,24 +5293,47 @@ portless
+     }
+   };
+   if (wantsTailscale && tsBaseUrl) {
+-    const maxAttempts = 3;
+-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+-      const usedPorts = getUsedServePorts();
+-      tailscaleHttpsPort = findAvailableServePort(usedPorts, wantsFunnel ? "funnel" : "serve");
+-      try {
+-        if (wantsFunnel) {
+-          registerFunnel(port, tailscaleHttpsPort);
+-        } else {
+-          registerServe(port, tailscaleHttpsPort);
++    const maxAttempts = 5;
++    try {
++      withTailscaleLock(() => {
++        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
++          const usedPorts = getUsedServePorts();
++          tailscaleHttpsPort = findAvailableServePort(
++            usedPorts,
++            wantsFunnel ? "funnel" : "serve",
++          );
++          try {
++            if (wantsFunnel) {
++              registerFunnel(port, tailscaleHttpsPort);
++            } else {
++              registerServe(port, tailscaleHttpsPort);
++            }
++            break;
++          } catch (err) {
++            const message = err instanceof Error ? err.message : String(err);
++            const isConflict =
++              message.includes("already in use") ||
++              isTailscaleConfigConflict(message);
++            if (isConflict && attempt < maxAttempts) {
++              Atomics.wait(
++                new Int32Array(new SharedArrayBuffer(4)),
++                0,
++                0,
++                50 * attempt,
++              );
++              continue;
++            }
++            throw err;
++          }
+         }
+-        break;
+-      } catch (err) {
+-        const message = err instanceof Error ? err.message : String(err);
+-        const isConflict = message.includes("already in use");
+-        if (isConflict && attempt < maxAttempts) continue;
+-        console.error(colors_default.red(`Error: ${message}`));
+-        process.exit(1);
+-      }
++      });
++    } catch (err) {
++      console.error(
++        colors_default.red(
++          `Error: ${err instanceof Error ? err.message : String(err)}`,
++        ),
++      );
++      process.exit(1);
+     }
+     tailscaleUrl = formatTailscaleUrl(tsBaseUrl, tailscaleHttpsPort);
+     const label = wantsFunnel ? "Funnel (public)" : "Tailscale";
