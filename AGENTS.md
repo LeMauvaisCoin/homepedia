@@ -27,27 +27,24 @@ Before changing:
 
 ## Conventions
 
-- Use Bun for JavaScript and uv for Python. Never npm, pnpm, pip or poetry.
+- Use Bun for JavaScript and uv for Python.
 - Conventional Commits in English. Link Linear in the commit body with
-  `refs LEM-123`, or `fixes LEM-123` only when the commit should close the
+  `refs LEM-123`, or `closes LEM-123` only when the commit should close the
   issue after merge. Use the issue's suggested branch name.
 - Use the Composio connection `lemauvaiscoin`. The Linear team is `LEM`.
 - Documentation and user-facing text are in French; code, identifiers and
   commit messages are in English.
 - Open pull requests against `staging`. Never push to `staging` or `main`
-  directly; promotion `staging` → `main` is a merge, never a squash.
-- Never skip Git hooks (`--no-verify`, `HUSKY=0`) and never silence a lint
+  directly.
+- Never skip Git hooks and never silence a lint
   rule to get a change through: fix the code, or change the rule in its own
   commit with the reason in [docs/quality.md](docs/quality.md).
 - Geographic codes are strings everywhere (`"01053"`), never numbers.
-- Do not add a package, app or dependency without a real consumer in the
-  same pull request; Knip fails the build otherwise.
 
 ## Authority limits
 
 - Without explicit human instruction, do not deploy, run
   `bun run supabase:deploy`, create or rotate secrets, subscribe to a paid
   service, or touch the `epitech` remote. Remote reads are allowed.
-- Secrets never enter Git, `.env.example` files or `VITE_` variables.
 - Record a decision that spans several pull requests as an ADR in
   `docs/architecture/`, in the same pull request as the change it explains.
