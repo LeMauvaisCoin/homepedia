@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from psycopg_pool import PoolTimeout
 
 from homepedia_api.db import create_pool
 from homepedia_api.errors import register_error_handlers
@@ -17,6 +18,16 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
     await pool.open()
     app.state.pool = pool
     try:
+        if settings.environment == "local":
+            try:
+                await pool.wait(timeout=3)
+            except PoolTimeout:
+                raise RuntimeError(
+                    "Impossible de se connecter à PostgreSQL : l'API ne peut pas démarrer. "
+                    "Vérifiez que Docker fonctionne, puis lancez `bun run supabase:start` "
+                    "depuis la racine du dépôt et relancez l'API. "
+                    "Si vous utilisez une autre base, vérifiez DATABASE_URL dans apps/api/.env."
+                ) from None
         yield
     finally:
         await pool.close()
