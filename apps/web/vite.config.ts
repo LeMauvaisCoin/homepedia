@@ -48,6 +48,10 @@ export default defineConfig(({ command, isPreview, mode }) => {
     server: {
       port: 5173,
       strictPort: true,
+      // Intervalle du ping HMR. Via Tailscale, un WebSocket muet est coupé au
+      // bout de 10 s et le client Vite recharge alors la page : le défaut de
+      // 30 s provoquait un rechargement en boucle.
+      hmr: { timeout: 5000 },
       allowedHosts:
         portlessDev && process.env.PORTLESS_TAILSCALE_URL
           ? [new URL(process.env.PORTLESS_TAILSCALE_URL).hostname]
