@@ -1,0 +1,25 @@
+name: Setup
+description: Installe Node, Bun, uv et les dépendances verrouillées du monorepo.
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v7
+      with:
+        node-version-file: .node-version
+
+    - uses: oven-sh/setup-bun@v2
+      with:
+        bun-version-file: .bun-version
+
+    - uses: astral-sh/setup-uv@v10
+      with:
+        enable-cache: true
+
+    - name: Dépendances JavaScript
+      shell: bash
+      run: bun install --frozen-lockfile
+
+    - name: Dépendances Python
+      shell: bash
+      run: uv sync --all-packages --locked
