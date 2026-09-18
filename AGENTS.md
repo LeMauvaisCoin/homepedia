@@ -15,14 +15,19 @@ Before changing:
 - the database, read
   [ADR-0001](docs/architecture/0001-supabase-reserve-a-l-api.md) and
   [docs/supabase.md](docs/supabase.md). The frontend never talks to Supabase;
+- API queries, read
+  [ADR-0002](docs/architecture/0002-requetes-sqlalchemy-core.md): SQLAlchemy
+  Core in `repositories/`, no SQL in routes. `tables.py` is generated from the
+  local database by `bun run generate`: never hand-edit it;
 - lint rules, hooks or CI, read [docs/quality.md](docs/quality.md).
 
 ## Commands
 
 - `bun run check`: typed lint, typecheck, unit tests. Run it before saying a
   change is done.
-- `bun run format`, `bun run knip`, `bun run generate:check`.
-- `bun run test:integration` and `bun run test:e2e` need the local database:
+- `bun run format`, `bun run knip`.
+- `bun run generate`, `bun run generate:check`, `bun run test:integration` and
+  `bun run test:e2e` need the local database:
   `bun run supabase:start`.
 
 ## Conventions

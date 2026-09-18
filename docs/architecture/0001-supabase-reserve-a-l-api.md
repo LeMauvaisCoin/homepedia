@@ -11,11 +11,14 @@ base et tous les clients : interface, API publique et MCP.
 
 ## Décision
 
-Seule l'API FastAPI parle à PostgreSQL. La Data API, Auth, Realtime, Storage
+Aucun client ne parle à PostgreSQL : seuls les services Python le font.
+L'API FastAPI aujourd'hui, puis le MCP à travers les mêmes fonctions de
+requête, et les pipelines pour publier. La Data API, Auth, Realtime, Storage
 et les Edge Functions sont désactivés dans `supabase/config.toml`. Chaque
 table active la RLS sans policy : si la Data API était rouverte par erreur,
 les rôles `anon` et `authenticated` ne verraient rien. L'API se connecte avec
-un rôle serveur qui contourne la RLS.
+un rôle serveur qui contourne la RLS, et écrit ses requêtes avec SQLAlchemy
+Core ([ADR-0002](0002-requetes-sqlalchemy-core.md)).
 
 ## Raisons
 

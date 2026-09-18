@@ -1,27 +1,30 @@
+from collections.abc import AsyncIterator
 from typing import Annotated
 
 from fastapi import Depends, Request
-from psycopg import AsyncConnection
-from psycopg.rows import DictRow, dict_row
-from psycopg_pool import AsyncConnectionPool
+from sqlalchemy import func, make_url
+from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine, create_async_engine
 
-type Connection = AsyncConnection[DictRow]
-type Pool = AsyncConnectionPool[Connection]
+# Supabase installe PostGIS dans le schéma `extensions` : les fonctions spatiales
+# sont qualifiées pour ne pas dépendre du `search_path` du rôle connecté.
+postgis = func.extensions
 
 
-def create_pool(database_url: str) -> Pool:
-    return AsyncConnectionPool(
-        database_url,
-        connection_class=AsyncConnection[DictRow],
-        kwargs={"row_factory": dict_row},
-        min_size=1,
-        max_size=5,
-        open=False,
+def create_database_engine(database_url: str) -> AsyncEngine:
+    return create_async_engine(
+        make_url(database_url).set(drivername="postgresql+psycopg"),
+        pool_size=5,
+        max_overflow=0,
+        pool_pre_ping=True,
+        # Le pooler Supabase en mode transaction ne conserve pas les requêtes préparées.
+        connect_args={"prepare_threshold": None},
     )
 
 
-def get_pool(request: Request) -> Pool:
-    return request.app.state.pool
+async def get_connection(request: Request) -> AsyncIterator[AsyncConnection]:
+    engine: AsyncEngine = request.app.state.engine
+    async with engine.connect() as connection:
+        yield connection
 
 
-PoolDep = Annotated[Pool, Depends(get_pool)]
+ConnectionDep = Annotated[AsyncConnection, Depends(get_connection)]

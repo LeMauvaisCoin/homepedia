@@ -5,8 +5,10 @@ description = "API HTTP de Homepedia (FastAPI)."
 requires-python = ">=3.13"
 dependencies = [
   "fastapi>=0.141.1",
-  "psycopg[binary,pool]>=3.3.5",
+  "geoalchemy2>=0.20.0",
+  "psycopg[binary]>=3.3.5",
   "pydantic-settings>=2.15.0",
+  "sqlalchemy[asyncio]>=2.0.54",
   "uvicorn[standard]>=0.53.0",
 ]
 
@@ -24,4 +26,10 @@ markers = [
 ]
 
 [dependency-groups]
-dev = ["httpx2>=2.13.0", "pytest>=9.1.1", "ruff>=0.16.8", "ty>=0.0.82"]
+dev = [
+  "httpx2>=2.13.0",
+  "pytest>=9.1.1",
+  "ruff>=0.16.8",
+  "sqlacodegen>=3",
+  "ty>=0.0.82",
+]

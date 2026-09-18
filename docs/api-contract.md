@@ -34,8 +34,10 @@ offset }`.
 - Erreurs au format `application/problem+json` (RFC 9457) via
   `homepedia_api.errors.Problem`, déclarées dans `responses` pour apparaître
   dans le contrat.
-- L'export fonctionne hors ligne : `create_app()` ne lit ni configuration ni
-  base de données.
+- L'export OpenAPI fonctionne hors ligne : `create_app()` ne lit ni
+  configuration ni base de données. `bun run generate` régénère aussi
+  `tables.py` et demande donc la base locale
+  ([ADR-0002](architecture/0002-requetes-sqlalchemy-core.md)).
 
 ## TypeScript 7 et le générateur
 

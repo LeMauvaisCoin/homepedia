@@ -28,5 +28,11 @@ def test_filters_by_name(database_client: TestClient) -> None:
     assert [territory["code"] for territory in response.json()["items"]] == ["69123"]
 
 
+def test_treats_wildcards_in_the_name_filter_as_literals(database_client: TestClient) -> None:
+    response = database_client.get("/v1/territories", params={"q": "_"})
+
+    assert response.json()["total"] == 0
+
+
 def test_readiness_reaches_the_database(database_client: TestClient) -> None:
     assert database_client.get("/health/ready").status_code == 200

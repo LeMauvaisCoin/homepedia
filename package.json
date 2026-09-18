@@ -27,7 +27,7 @@
     "test:integration": "turbo run test:integration",
     "test:e2e": "turbo run test:e2e",
     "generate": "turbo run generate",
-    "generate:check": "turbo run generate && git diff --exit-code -- apps/api/openapi.json packages/api-client && test -z \"$(git status --porcelain -- apps/api/openapi.json packages/api-client)\"",
+    "generate:check": "turbo run generate && git diff --exit-code -- apps/api/src/homepedia_api/tables.py apps/api/openapi.json packages/api-client && test -z \"$(git status --porcelain -- apps/api/src/homepedia_api/tables.py apps/api/openapi.json packages/api-client)\"",
     "format": "oxfmt --write . && uv run ruff format .",
     "format:check": "oxfmt --check . && uv run ruff format --check .",
     "knip": "knip-bun",

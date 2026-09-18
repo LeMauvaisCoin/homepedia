@@ -61,7 +61,12 @@
       "cache": false,
       "passThroughEnv": ["DATABASE_URL", "CI", "PLAYWRIGHT_*"]
     },
+    "tables": {
+      "cache": false,
+      "passThroughEnv": ["DATABASE_URL"]
+    },
     "openapi": {
+      "dependsOn": ["tables"],
       "inputs": [
         "src/**",
         "pyproject.toml",

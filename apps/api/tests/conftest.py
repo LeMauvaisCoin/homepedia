@@ -3,15 +3,15 @@ from collections.abc import Iterator
 import pytest
 from fastapi.testclient import TestClient
 
-from homepedia_api.db import get_pool
+from homepedia_api.db import get_connection
 from homepedia_api.main import create_app
 
 
 @pytest.fixture
 def offline_client() -> TestClient:
-    """Client sans base : le cycle de vie n'est pas démarré, le pool est remplacé."""
+    """Client sans base : le cycle de vie n'est pas démarré, la connexion est remplacée."""
     app = create_app()
-    app.dependency_overrides[get_pool] = lambda: None
+    app.dependency_overrides[get_connection] = lambda: None
     return TestClient(app)
 
 

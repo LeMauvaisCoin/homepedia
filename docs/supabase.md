@@ -16,6 +16,7 @@ bunx supabase migration new <nom_en_snake_case> --workdir .
 # éditer supabase/migrations/<horodatage>_<nom>.sql
 bun run supabase:reset        # rejoue tout depuis zéro, seed compris
 bun run supabase:lint         # plpgsql_check sur le schéma public
+bun run generate              # régénère tables.py depuis la base migrée
 bun run test:integration
 ```
 
@@ -24,6 +25,9 @@ Règles :
 - une migration fusionnée ne se modifie plus : corriger par une nouvelle ;
 - toute nouvelle table active la RLS sans policy (ADR-0001) ;
 - les codes géographiques sont des `text`, jamais des entiers ;
+- après `bun run supabase:reset`, lancer `bun run generate` et committer
+  `apps/api/src/homepedia_api/tables.py` avec la migration
+  ([ADR-0002](architecture/0002-requetes-sqlalchemy-core.md)) ;
 - rester compatible avec la version précédente de l'API le temps d'un
   déploiement (ajouter, migrer, puis retirer dans une migration ultérieure) ;
 - décrire le retour arrière dans la PR : migration inverse, ou restauration
@@ -67,6 +71,20 @@ est `wrahjubnsmbfmgnrepha` ; ce n'est pas un identifiant secret.
 La Data API est désactivée. La connexion applicative reste réservée à
 FastAPI via `DATABASE_URL`, conservée dans l'environnement du serveur.
 Le développement local garde sa base et son jeu d'exemple indépendants.
+
+Quelle adresse mettre dans `DATABASE_URL` :
+
+| Client                                             | Accès                                                                                                                       |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| API et MCP sur Railway                             | Connexion directe, `db.wrahjubnsmbfmgnrepha.supabase.co:5432`. Elle est en IPv6 : activer l'IPv6 sortant du service Railway |
+| Poste de développement, GitHub Actions, Databricks | Pooler en mode session, `aws-1-eu-west-1.pooler.supabase.com:5432` (IPv4)                                                   |
+
+L'API garde déjà son propre pool de connexions : un pooler externe ne lui
+apporte rien. Le mode transaction (port `6543`) vise le serverless ; il perd
+l'état de session (`SET`, `LISTEN/NOTIFY`, verrous consultatifs) et Supabase
+n'y garantit pas les requêtes préparées. L'API fonctionne quand même à
+travers lui, requêtes préparées désactivées
+([ADR-0002](architecture/0002-requetes-sqlalchemy-core.md)).
 
 La migration `20260918120000_example_territories.sql` a été appliquée lors
 de l'initialisation du projet : PostGIS est installé, `public.territories`

@@ -2,8 +2,9 @@ from typing import Literal
 
 from fastapi import APIRouter
 from pydantic import BaseModel
+from sqlalchemy import select
 
-from homepedia_api.db import PoolDep
+from homepedia_api.db import ConnectionDep
 
 router = APIRouter(tags=["santé"])
 
@@ -22,7 +23,6 @@ async def get_health() -> Health:
     operation_id="getReadiness",
     summary="Vérifier que l'API atteint la base de données",
 )
-async def get_readiness(pool: PoolDep) -> Health:
-    async with pool.connection() as connection:
-        await connection.execute("select 1")
+async def get_readiness(connection: ConnectionDep) -> Health:
+    await connection.execute(select(1))
     return Health()

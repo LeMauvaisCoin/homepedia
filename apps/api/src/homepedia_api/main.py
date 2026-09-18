@@ -1,11 +1,12 @@
+import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from psycopg_pool import PoolTimeout
+from sqlalchemy.exc import OperationalError
 
-from homepedia_api.db import create_pool
+from homepedia_api.db import create_database_engine
 from homepedia_api.errors import register_error_handlers
 from homepedia_api.routes import health, territories
 from homepedia_api.settings import get_settings
@@ -14,14 +15,14 @@ from homepedia_api.settings import get_settings
 @asynccontextmanager
 async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
-    pool = create_pool(str(settings.database_url))
-    await pool.open()
-    app.state.pool = pool
+    engine = create_database_engine(str(settings.database_url))
+    app.state.engine = engine
     try:
         if settings.environment == "local":
             try:
-                await pool.wait(timeout=3)
-            except PoolTimeout:
+                async with asyncio.timeout(3), engine.connect():
+                    pass
+            except (OperationalError, TimeoutError):
                 raise RuntimeError(
                     "Impossible de se connecter à PostgreSQL : l'API ne peut pas démarrer. "
                     "Vérifiez que Docker fonctionne, puis lancez `bun run supabase:start` "
@@ -30,7 +31,7 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
                 ) from None
         yield
     finally:
-        await pool.close()
+        await engine.dispose()
 
 
 def create_app() -> FastAPI:

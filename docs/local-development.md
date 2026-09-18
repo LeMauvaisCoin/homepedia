@@ -110,7 +110,7 @@ comme les tâches qui touchent la base (`test:integration`, `test:e2e`).
 | `bun run knip`             | Code, exports et dépendances inutilisés                             |
 | `bun run test:integration` | Tests de l'API contre la base locale                                |
 | `bun run test:e2e`         | Scénarios Playwright : build du frontend, API et base locale        |
-| `bun run generate`         | Contrat OpenAPI puis client TypeScript                              |
+| `bun run generate`         | Tables SQLAlchemy (base locale), contrat OpenAPI, client TypeScript |
 | `bun run supabase:reset`   | Reconstruit la base depuis les migrations et le seed                |
 | `bun run supabase:stop`    | Arrête la pile locale                                               |
 

@@ -3,8 +3,9 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, Query
 from pydantic import BaseModel, Field
 
-from homepedia_api.db import PoolDep
+from homepedia_api.db import ConnectionDep
 from homepedia_api.errors import PROBLEM_MEDIA_TYPE, Problem
+from homepedia_api.repositories import territories as repository
 
 router = APIRouter(prefix="/v1", tags=["territoires"])
 
@@ -32,31 +33,6 @@ class TerritoryPage(BaseModel):
     offset: int
 
 
-_LIST_SQL = """
-select
-  code,
-  level,
-  name,
-  department_code,
-  region_code,
-  population,
-  extensions.st_x(centroid) as longitude,
-  extensions.st_y(centroid) as latitude
-from public.territories
-where (%(level)s::text is null or level = %(level)s)
-  and (%(q)s::text is null or name ilike '%%' || %(q)s || '%%')
-order by name, code
-limit %(limit)s offset %(offset)s
-"""
-
-_COUNT_SQL = """
-select count(*) as total
-from public.territories
-where (%(level)s::text is null or level = %(level)s)
-  and (%(q)s::text is null or name ilike '%%' || %(q)s || '%%')
-"""
-
-
 @router.get(
     "/territories",
     operation_id="listTerritories",
@@ -66,7 +42,7 @@ where (%(level)s::text is null or level = %(level)s)
     },
 )
 async def list_territories(
-    pool: PoolDep,
+    connection: ConnectionDep,
     level: Annotated[TerritoryLevel | None, Query(description="Niveau territorial.")] = None,
     q: Annotated[
         str | None,
@@ -75,13 +51,12 @@ async def list_territories(
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> TerritoryPage:
-    params = {"level": level, "q": q, "limit": limit, "offset": offset}
-    async with pool.connection() as connection:
-        rows = await (await connection.execute(_LIST_SQL, params)).fetchall()
-        count = await (await connection.execute(_COUNT_SQL, params)).fetchone()
+    rows, total = await repository.list_territories(
+        connection, repository.TerritoryFilters(level=level, q=q), limit=limit, offset=offset
+    )
     return TerritoryPage(
         items=[Territory.model_validate(row) for row in rows],
-        total=count["total"] if count else 0,
+        total=total,
         limit=limit,
         offset=offset,
     )
