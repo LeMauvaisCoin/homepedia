@@ -66,11 +66,11 @@ ni ingestion, ni appel réseau payant, ni test dépendant de la base.
 `.github/workflows/ci.yml`, sur chaque PR et sur `main`/`staging`, avec les
 runners hébergés par GitHub :
 
-| Job     | Contenu                                                                                                                                     |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `knip`  | Code, exports et dépendances inutilisés                                                                                                     |
-| `check` | Conventional Commits de la PR, formatage, lint typé, typecheck, tests unitaires, contrat et client régénérés sans différence, build         |
-| `e2e`   | Base locale Supabase (migrations + seed), lint SQL, tests d'intégration de l'API, scénarios Playwright ; rapport en artefact en cas d'échec |
+| Job     | Contenu                                                                                                                                                                                          |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `knip`  | Code, exports et dépendances inutilisés                                                                                                                                                          |
+| `check` | Conventional Commits de la PR, formatage, lint typé, typecheck, tests unitaires, build                                                                                                           |
+| `e2e`   | Base locale Supabase (migrations + seed), lint SQL, tables, contrat et client régénérés sans différence, tests d'intégration de l'API, scénarios Playwright ; rapport en artefact en cas d'échec |
 
 Les trois jobs sont à rendre obligatoires dans la protection de `main` et
 `staging`. La CI ne déploie rien et n'applique aucune migration distante.

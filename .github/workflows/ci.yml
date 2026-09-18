@@ -53,9 +53,6 @@ jobs:
       - name: Lint typé, typecheck et tests unitaires
         run: bun run check
 
-      - name: Contrat OpenAPI et client TypeScript à jour
-        run: bun run generate:check
-
       - name: Build
         run: bun run build
         env:
@@ -75,6 +72,11 @@ jobs:
 
       - name: Lint du schéma SQL
         run: bun run supabase:lint
+
+      - name: Tables SQLAlchemy, contrat OpenAPI et client TypeScript à jour
+        run: bun run generate:check
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:55322/postgres
 
       - name: Tests d'intégration de l'API
         run: bun run test:integration
