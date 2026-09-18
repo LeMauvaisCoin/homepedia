@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 80,
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "dist",
+    "**/routeTree.gen.ts",
+    "apps/api/openapi.json",
+    "packages/api-client/src/generated/**",
+    "tools/oxlint/anti-slop/**",
+    "supabase/.branches/**",
+    "supabase/.temp/**",
+    "test-results/**",
+    "playwright-report/**"
+  ]
+}
