@@ -12,7 +12,7 @@ runs:
       with:
         bun-version-file: .bun-version
 
-    - uses: astral-sh/setup-uv@v10
+    - uses: astral-sh/setup-uv@v10.1.0
       with:
         enable-cache: true
 
