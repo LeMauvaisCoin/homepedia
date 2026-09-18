@@ -16,6 +16,12 @@
 Versions épinglées ensemble : `oxlint` et `@oxlint/plugins` à la même version,
 `oxlint-tsgolint` et `typescript` 7. Les mettre à jour dans la même PR.
 
+Le code généré n'est ni linté ni formaté : `packages/api-client/src/generated`
+pour Oxlint et Oxfmt, `apps/api/src/homepedia_api/tables.py` pour Ruff
+(sqlacodegen écrit les contraintes SQL sur une ligne, au-delà de la largeur
+autorisée). `bun run generate:check` garantit qu'ils ne sont pas modifiés à la
+main.
+
 `bun run lint:root` lance Oxlint une fois sur tout le dépôt ; le lint typé
 porte donc toujours sur le projet complet. Lint, typecheck (`tsc --noEmit`) et
 build (`vite build`) sont trois contrôles distincts : chacun détecte ses
