@@ -1,0 +1,25 @@
+node_modules/
+.turbo/
+dist/
+.DS_Store
+*.log
+*.tsbuildinfo
+
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+
+# Environnement : seuls les exemples sans secret sont versionnés.
+.env*
+!.env.example
+
+# État local de la CLI Supabase.
+supabase/.branches/
+supabase/.temp/
+
+# Sorties Playwright : rapports et traces sont des artefacts de CI.
+playwright-report/
+test-results/
+blob-report/

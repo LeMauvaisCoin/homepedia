@@ -1,0 +1,81 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "globalDependencies": [".node-version", ".python-version"],
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*", "$TURBO_ROOT$/tsconfig.base.json"],
+      "outputs": ["dist/**"],
+      "env": ["VITE_*"]
+    },
+    "typecheck": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/tsconfig.base.json",
+        "$TURBO_ROOT$/pyproject.toml",
+        "$TURBO_ROOT$/uv.lock",
+        "$TURBO_ROOT$/packages/api-client/src/**"
+      ]
+    },
+    "lint": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/pyproject.toml",
+        "$TURBO_ROOT$/uv.lock"
+      ]
+    },
+    "lint:fix": {
+      "cache": false
+    },
+    "//#lint:root": {
+      "inputs": [
+        "apps/web/**",
+        "packages/**",
+        "scripts/**",
+        "tools/oxlint/**",
+        "*.{ts,mjs,json}",
+        ".oxlintrc.json",
+        "bun.lock"
+      ]
+    },
+    "//#lint:fix:root": {
+      "cache": false
+    },
+    "test": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/pyproject.toml",
+        "$TURBO_ROOT$/uv.lock"
+      ]
+    },
+    "test:integration": {
+      "cache": false
+    },
+    "test:e2e": {
+      "cache": false
+    },
+    "openapi": {
+      "inputs": [
+        "src/**",
+        "pyproject.toml",
+        "$TURBO_ROOT$/pyproject.toml",
+        "$TURBO_ROOT$/uv.lock"
+      ],
+      "outputs": ["openapi.json"]
+    },
+    "generate": {
+      "dependsOn": ["@homepedia/api#openapi"],
+      "inputs": [
+        "openapi-ts.config.ts",
+        "package.json",
+        "$TURBO_ROOT$/apps/api/openapi.json",
+        "$TURBO_ROOT$/bun.lock"
+      ],
+      "outputs": ["src/generated/**"]
+    }
+  }
+}
