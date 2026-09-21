@@ -1,0 +1,11 @@
+while read local_ref local_sha remote_ref remote_sha
+do
+  case "$remote_ref" in
+    refs/heads/staging|refs/heads/main)
+      echo "Direct pushes to '${remote_ref#refs/heads/}' are refused: open a pull request."
+      exit 1
+      ;;
+  esac
+done
+
+bun run check

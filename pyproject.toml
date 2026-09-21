@@ -1,0 +1,42 @@
+[project]
+name = "homepedia"
+version = "0.0.0"
+description = "Workspace Python de Homepedia : API, puis MCP et pipelines."
+requires-python = ">=3.13"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["apps/api"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+src = ["apps/*/src"]
+# Generated code: `bun run generate:check` compares it with the migrated database.
+extend-exclude = ["apps/api/src/homepedia_api/tables.py"]
+force-exclude = true
+
+[tool.ruff.lint]
+select = [
+  "E",
+  "F",
+  "W",
+  "I",
+  "B",
+  "UP",
+  "N",
+  "S",
+  "C4",
+  "SIM",
+  "PTH",
+  "RUF",
+  "ASYNC",
+  "ANN",
+  "T20",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S101"]

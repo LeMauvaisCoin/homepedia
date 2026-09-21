@@ -1,0 +1,65 @@
+{
+  "name": "homepedia",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.4.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "bun": "1.4.0"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "setup": "bun scripts/setup.ts",
+    "dev": "bun run dev:portless --ui=stream",
+    "dev:web": "bun run dev:portless --filter @homepedia/web",
+    "dev:api": "bun run dev:portless --filter @homepedia/api",
+    "dev:portless": "export PORTLESS_PORT=1355 PORTLESS_LAN=0 && portless proxy start --port $PORTLESS_PORT --https && turbo run dev",
+    "build": "turbo run build",
+    "check": "turbo run lint lint:root typecheck test",
+    "lint": "turbo run lint lint:root",
+    "lint:fix": "turbo run lint:fix lint:fix:root",
+    "lint:root": "oxlint --deny-warnings",
+    "lint:fix:root": "oxlint --fix",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:integration": "turbo run test:integration",
+    "test:e2e": "turbo run test:e2e",
+    "generate": "turbo run generate",
+    "generate:check": "turbo run generate && git diff --exit-code -- apps/api/src/homepedia_api/tables.py apps/api/openapi.json packages/api-client && test -z \"$(git status --porcelain -- apps/api/src/homepedia_api/tables.py apps/api/openapi.json packages/api-client)\"",
+    "format": "oxfmt --write . && uv run ruff format .",
+    "format:check": "oxfmt --check . && uv run ruff format --check .",
+    "knip": "knip-bun",
+    "supabase:start": "supabase start --workdir .",
+    "supabase:stop": "supabase stop --workdir .",
+    "supabase:reset": "supabase db reset --local --workdir .",
+    "supabase:lint": "supabase db lint --local --workdir . --schema public --fail-on warning",
+    "supabase:deploy:plan": "supabase db push --linked --dry-run --workdir .",
+    "supabase:deploy": "supabase db push --linked --workdir . && supabase config push --workdir .",
+    "dev:tailnet": "PORTLESS_TAILSCALE=1 bun run dev",
+    "dev:urls": "portless list",
+    "dev:doctor": "portless doctor"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "21.2.2",
+    "@commitlint/config-conventional": "21.2.2",
+    "@oxlint/plugins": "1.83.0",
+    "@shadcn/lint": "0.1.1",
+    "@types/bun": "^1.4.2",
+    "husky": "9.1.7",
+    "knip": "6.37.0",
+    "lint-staged": "17.5.1",
+    "oxfmt": "0.68.0",
+    "oxlint": "1.83.0",
+    "oxlint-tsgolint": "7.0.2002",
+    "portless": "0.15.6",
+    "supabase": "2.117.0",
+    "turbo": "2.10.13",
+    "typescript": "7.0.2"
+  },
+  "patchedDependencies": {
+    "portless@0.15.6": "patches/portless@0.15.6.patch"
+  }
+}

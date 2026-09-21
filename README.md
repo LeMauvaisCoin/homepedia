@@ -22,4 +22,26 @@ Dépôt principal : [leo-mathurin/homepedia](https://github.com/leo-mathurin/hom
 
 Branches persistantes : `main` pour la production, `staging` pour l’intégration testée uniquement en local. Backlog partagé, tâches prises librement et petites PR ; aucun domaine réservé.
 
-L’application n’est pas encore initialisée. Les commandes de développement seront ajoutées avec le socle technique. Le cadrage est maintenu dans Linear ; ce dépôt accueillera le code, les tests et la documentation technique générée.
+### Démarrage local
+
+Prérequis : [Bun](https://bun.sh) 1.4.0, Node.js 24, [uv](https://docs.astral.sh/uv/) et Docker. Aucun compte cloud n’est nécessaire.
+
+```sh
+bun install              # dépendances JavaScript et hooks Git
+bun run setup            # fichiers .env locaux et environnement Python
+bun run supabase:start   # PostgreSQL/PostGIS local : migrations + jeu d’exemple
+bun run dev              # URL HTTPS locales et ports libres avec Portless
+bun run dev:tailnet      # accès depuis le Mac via Tailscale
+```
+
+Ouvrir l’URL affichée pour `homepedia` (`bun run dev:urls` pour la retrouver) : elle affiche les douze communes du jeu d’exemple. Pour le premier démarrage et les URL par worktree, voir le [guide local](docs/local-development.md).
+
+| Chemin                | Contenu                                                  |
+| --------------------- | -------------------------------------------------------- |
+| `apps/web`            | Frontend React/Vite, TanStack Router et Query, shadcn/ui |
+| `apps/api`            | API FastAPI/Pydantic, dépendances gérées par uv          |
+| `packages/api-client` | Client TypeScript généré depuis le contrat OpenAPI       |
+| `supabase`            | Configuration, migrations SQL et jeu d’exemple           |
+| `tools/oxlint`        | Plugin Oxlint anti-slop vendorisé                        |
+
+Avant de pousser : `bun run check`. Guides : [développement local](docs/local-development.md), [contrat de l’API](docs/api-contract.md), [Supabase et migrations](docs/supabase.md), [qualité, hooks et CI](docs/quality.md). Les consignes pour les agents sont dans [AGENTS.md](AGENTS.md).

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.ts"],
+      // uv is installed outside npm; the anti-slop plugin is a vendored copy.
+      "ignoreBinaries": ["uv"],
+      "ignore": ["tools/oxlint/anti-slop/**"],
+    },
+    "apps/api": {
+      "ignoreBinaries": ["uv"],
+    },
+    "apps/web": {
+      "entry": ["src/**/*.test.ts", "e2e/**/*.e2e.ts"],
+      // shadcn primitives: their unused exports are part of the component.
+      "ignore": ["src/components/ui/**"],
+    },
+    "packages/api-client": {
+      "ignore": ["src/generated/**"],
+    },
+  },
+}

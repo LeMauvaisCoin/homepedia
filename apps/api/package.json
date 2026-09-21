@@ -1,0 +1,21 @@
+{
+  "name": "@homepedia/api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "PORTLESS_TAILSCALE=0 PORTLESS_FUNNEL=0 portless",
+    "start": "uv run uvicorn homepedia_api.main:create_configured_app --factory --port 8000",
+    "lint": "uv run ruff check .",
+    "lint:fix": "uv run ruff check --fix .",
+    "typecheck": "uv run ty check",
+    "test": "uv run pytest -m 'not integration'",
+    "test:integration": "uv run pytest -m integration",
+    "tables": "uv run python scripts/generate_tables.py src/homepedia_api/tables.py",
+    "openapi": "uv run python -m homepedia_api.openapi openapi.json",
+    "dev:app": "uv run uvicorn homepedia_api.main:create_configured_app --factory --reload --host ${HOST:-127.0.0.1} --port ${PORT:-8000}"
+  },
+  "portless": {
+    "name": "api.homepedia",
+    "script": "dev:app"
+  }
+}
