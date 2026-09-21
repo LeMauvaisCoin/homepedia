@@ -11,15 +11,15 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 
-# Environnement : seuls les exemples sans secret sont versionnés.
+# Environment: only the secret-free examples are versioned.
 .env*
 !.env.example
 
-# État local de la CLI Supabase.
+# Local state of the Supabase CLI.
 supabase/.branches/
 supabase/.temp/
 
-# Sorties Playwright : rapports et traces sont des artefacts de CI.
+# Playwright output: reports and traces are CI artifacts.
 playwright-report/
 test-results/
 blob-report/

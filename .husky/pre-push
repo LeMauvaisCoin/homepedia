@@ -2,7 +2,7 @@ while read local_ref local_sha remote_ref remote_sha
 do
   case "$remote_ref" in
     refs/heads/staging|refs/heads/main)
-      echo "Les pushs directs vers '${remote_ref#refs/heads/}' sont refusés : ouvrir une pull request."
+      echo "Direct pushes to '${remote_ref#refs/heads/}' are refused: open a pull request."
       exit 1
       ;;
   esac

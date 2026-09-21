@@ -3,7 +3,7 @@
   "workspaces": {
     ".": {
       "entry": ["scripts/*.ts"],
-      // uv est installé hors npm ; le plugin anti-slop est une copie vendorisée.
+      // uv is installed outside npm; the anti-slop plugin is a vendored copy.
       "ignoreBinaries": ["uv"],
       "ignore": ["tools/oxlint/anti-slop/**"],
     },
@@ -12,7 +12,7 @@
     },
     "apps/web": {
       "entry": ["src/**/*.test.ts", "e2e/**/*.e2e.ts"],
-      // Primitives shadcn : leurs exports inutilisés font partie du composant.
+      // shadcn primitives: their unused exports are part of the component.
       "ignore": ["src/components/ui/**"],
     },
     "packages/api-client": {

@@ -1,9 +1,9 @@
-# Configuration Supabase de Homepedia. Référence des clés :
+# Homepedia's Supabase configuration. Key reference:
 # https://supabase.com/docs/guides/local-development/cli/config
 #
-# Seule l'API FastAPI parle à PostgreSQL : les services exposés au navigateur
-# (Data API, Auth, Realtime, Storage, Edge Functions) restent désactivés.
-# Les ports 5532x évitent les collisions avec d'autres piles Supabase locales.
+# Only the FastAPI API talks to PostgreSQL: the services exposed to the browser
+# (Data API, Auth, Realtime, Storage, Edge Functions) stay disabled.
+# The 5532x ports avoid collisions with other local Supabase stacks.
 project_id = "homepedia"
 
 [api]
@@ -19,7 +19,7 @@ major_version = 17
 enabled = true
 
 [db.seed]
-# Données d'exemple : locales uniquement, jamais poussées en production.
+# Example data: local only, never pushed to production.
 enabled = true
 sql_paths = ["./seeds/*.sql"]
 

@@ -15,7 +15,7 @@ const router = createRouter({
   routeTree,
   context: { queryClient },
   defaultPreload: "intent",
-  // Le cache appartient à TanStack Query : le routeur ne garde rien de périmé.
+  // The cache belongs to TanStack Query: the router keeps nothing stale.
   defaultPreloadStaleTime: 0,
 });
 
@@ -28,7 +28,7 @@ declare module "@tanstack/react-router" {
 const root = document.getElementById("root");
 
 if (!root) {
-  throw new Error("Élément #root introuvable dans index.html");
+  throw new Error("#root element not found in index.html");
 }
 
 createRoot(root).render(

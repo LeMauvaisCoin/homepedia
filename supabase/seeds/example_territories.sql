@@ -1,9 +1,9 @@
--- Jeu d'exemple : les douze préfectures de la région Auvergne-Rhône-Alpes.
+-- Example dataset: the twelve prefectures of the Auvergne-Rhône-Alpes region.
 --
--- Origine : API Découpage administratif (https://geo.api.gouv.fr/communes/{code}
--- avec fields=nom,code,population,centre,codeDepartement,codeRegion), données
--- INSEE/IGN sous Licence Ouverte 2.0, relevées le 18 septembre 2026.
--- Chargé par `supabase start` et `supabase db reset` en local uniquement.
+-- Source: API Découpage administratif (https://geo.api.gouv.fr/communes/{code}
+-- with fields=nom,code,population,centre,codeDepartement,codeRegion), INSEE/IGN
+-- data under Licence Ouverte 2.0, retrieved on 18 September 2026.
+-- Loaded by `supabase start` and `supabase db reset`, locally only.
 
 insert into public.territories
   (code, level, name, department_code, region_code, population, centroid)

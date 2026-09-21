@@ -26,14 +26,14 @@ jobs:
         with:
           bun-version-file: .bun-version
 
-      - name: Dépendances JavaScript
+      - name: JavaScript dependencies
         run: bun install --frozen-lockfile --ignore-scripts
 
-      - name: Code et dépendances inutilisés
+      - name: Unused code and dependencies
         run: bun run knip --reporter github-actions
 
   check:
-    name: Lint, types, tests et build
+    name: Lint, types, tests and build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -47,10 +47,10 @@ jobs:
         if: github.event_name == 'pull_request'
         run: bunx commitlint --verbose --from "${{ github.event.pull_request.base.sha }}" --to "${{ github.event.pull_request.head.sha }}"
 
-      - name: Formatage (Oxfmt et Ruff)
+      - name: Formatting (Oxfmt and Ruff)
         run: bun run format:check
 
-      - name: Lint typé, typecheck et tests unitaires
+      - name: Typed lint, typecheck and unit tests
         run: bun run check
 
       - name: Build
@@ -59,7 +59,7 @@ jobs:
           VITE_API_URL: http://localhost:8000
 
   e2e:
-    name: Intégration et E2E sur le jeu d'exemple
+    name: Integration and E2E on the example dataset
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -67,23 +67,23 @@ jobs:
 
       - uses: ./.github/actions/setup
 
-      - name: Base locale reconstruite depuis les migrations et le seed
+      - name: Local database rebuilt from the migrations and the seed
         run: bunx supabase db start --workdir .
 
-      - name: Lint du schéma SQL
+      - name: SQL schema lint
         run: bun run supabase:lint
 
-      - name: Tables SQLAlchemy, contrat OpenAPI et client TypeScript à jour
+      - name: SQLAlchemy tables, OpenAPI contract and TypeScript client up to date
         run: bun run generate:check
         env:
           DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:55322/postgres
 
-      - name: Tests d'intégration de l'API
+      - name: API integration tests
         run: bun run test:integration
         env:
           DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:55322/postgres
 
-      - name: Version de Playwright
+      - name: Playwright version
         id: playwright
         working-directory: apps/web
         run: echo "version=$(bunx playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
@@ -93,11 +93,11 @@ jobs:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ steps.playwright.outputs.version }}-chromium
 
-      - name: Navigateur et dépendances système
+      - name: Browser and system dependencies
         working-directory: apps/web
         run: bunx playwright install --with-deps chromium
 
-      - name: Scénarios Playwright
+      - name: Playwright scenarios
         run: bun run test:e2e
 
       - uses: actions/upload-artifact@v7
@@ -110,6 +110,6 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
 
-      - name: Arrêt de la base locale
+      - name: Stop the local database
         if: always()
         run: bun run supabase:stop

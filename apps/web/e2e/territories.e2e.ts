@@ -1,8 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("affiche les communes du jeu d’exemple servies par l’API", async ({
-  page,
-}) => {
+test("shows the example communes served by the API", async ({ page }) => {
   await page.goto("/");
 
   await expect(page.getByRole("cell", { name: "Annecy" })).toBeVisible();
@@ -10,9 +8,7 @@ test("affiche les communes du jeu d’exemple servies par l’API", async ({
   await expect(page.getByText("12 territoires — page 1 sur 3")).toBeVisible();
 });
 
-test("conserve la recherche dans l’URL après rechargement", async ({
-  page,
-}) => {
+test("keeps the search in the URL after a reload", async ({ page }) => {
   await page.goto("/");
   await page
     .getByRole("searchbox", { name: "Rechercher une commune" })
@@ -27,7 +23,7 @@ test("conserve la recherche dans l’URL après rechargement", async ({
   await expect(page.getByRole("cell", { name: "Annecy" })).toBeHidden();
 });
 
-test("pagine côté serveur et suit l’historique du navigateur", async ({
+test("paginates on the server and follows the browser history", async ({
   page,
 }) => {
   await page.goto("/");

@@ -15,7 +15,7 @@ members = ["apps/api"]
 line-length = 100
 target-version = "py313"
 src = ["apps/*/src"]
-# Code généré : `bun run generate:check` le compare à la base migrée.
+# Generated code: `bun run generate:check` compares it with the migrated database.
 extend-exclude = ["apps/api/src/homepedia_api/tables.py"]
 force-exclude = true
 

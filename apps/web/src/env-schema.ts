@@ -3,8 +3,8 @@ import { z } from "zod";
 
 type RuntimeEnv = Record<string, string | boolean | number | undefined>;
 
-// Partagé entre le navigateur (src/env.ts) et la validation au build
-// (vite.config.ts). Seules des valeurs publiques : elles finissent dans le bundle.
+// Shared between the browser (src/env.ts) and build-time validation
+// (vite.config.ts). Public values only: they end up in the bundle.
 export function parseClientEnv(runtimeEnv: RuntimeEnv) {
   return createEnv({
     clientPrefix: "VITE_",

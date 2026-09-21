@@ -37,8 +37,10 @@ Before changing:
   `refs LEM-123`, or `closes LEM-123` only when the commit should close the
   issue after merge. Use the issue's suggested branch name.
 - Use the Composio connection `lemauvaiscoin`. The Linear team is `LEM`.
-- Documentation and user-facing text are in French; code, identifiers and
-  commit messages are in English.
+- Documentation (`docs/`, README, ADRs) and the web interface text are in
+  French. Everything else is in English: code, identifiers, comments, error
+  and log messages, OpenAPI summaries and descriptions, test names, CI step
+  names and commit messages.
 - Open pull requests against `staging`. Never push to `staging` or `main`
   directly.
 - Never skip Git hooks and never silence a lint

@@ -1,5 +1,5 @@
 name: Setup
-description: Installe Node, Bun, uv et les dépendances verrouillées du monorepo.
+description: Install Node, Bun, uv and the locked dependencies of the monorepo.
 
 runs:
   using: composite
@@ -16,10 +16,10 @@ runs:
       with:
         enable-cache: true
 
-    - name: Dépendances JavaScript
+    - name: JavaScript dependencies
       shell: bash
       run: bun install --frozen-lockfile
 
-    - name: Dépendances Python
+    - name: Python dependencies
       shell: bash
       run: uv sync --all-packages --locked
