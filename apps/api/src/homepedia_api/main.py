@@ -15,7 +15,7 @@ from homepedia_api.settings import get_settings
 @asynccontextmanager
 async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
-    engine = create_database_engine(str(settings.database_url.get_secret_value()))
+    engine = create_database_engine(settings.sqlalchemy_url)
     app.state.engine = engine
     try:
         if settings.environment == "local":
@@ -24,10 +24,10 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
                     pass
             except (OperationalError, TimeoutError):
                 raise RuntimeError(
-                    "Impossible de se connecter à PostgreSQL : l'API ne peut pas démarrer. "
-                    "Vérifiez que Docker fonctionne, puis lancez `bun run supabase:start` "
-                    "depuis la racine du dépôt et relancez l'API. "
-                    "Si vous utilisez une autre base, vérifiez DATABASE_URL dans apps/api/.env."
+                    "Cannot connect to PostgreSQL: the API cannot start. "
+                    "Check that Docker is running, then run `bun run supabase:start` "
+                    "from the repository root and restart the API. "
+                    "If you use another database, check DATABASE_URL in apps/api/.env."
                 ) from None
         yield
     finally:
@@ -35,11 +35,11 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 def create_app() -> FastAPI:
-    """Construit l'application sans lire la configuration : l'export OpenAPI reste hors ligne."""
+    """Build the app without reading the configuration: the OpenAPI export stays offline."""
     app = FastAPI(
         title="Homepedia API",
         version="0.1.0",
-        description="Exploration immobilière territoriale.",
+        description="Territorial real estate exploration.",
         lifespan=_lifespan,
         responses={500: PROBLEM_RESPONSE},
     )

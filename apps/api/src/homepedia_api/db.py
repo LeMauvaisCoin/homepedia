@@ -2,21 +2,21 @@ from collections.abc import AsyncIterator
 from typing import Annotated
 
 from fastapi import Depends, Request
-from sqlalchemy import func, make_url
+from sqlalchemy import URL, func
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine, create_async_engine
 
-# Supabase installe PostGIS dans le schéma `extensions` : les fonctions spatiales
-# sont qualifiées pour ne pas dépendre du `search_path` du rôle connecté.
+# Supabase installs PostGIS in the `extensions` schema: spatial functions are
+# qualified so they do not depend on the connected role's `search_path`.
 postgis = func.extensions
 
 
-def create_database_engine(database_url: str) -> AsyncEngine:
+def create_database_engine(url: URL) -> AsyncEngine:
     return create_async_engine(
-        make_url(database_url).set(drivername="postgresql+psycopg"),
+        url,
         pool_size=5,
         max_overflow=0,
         pool_pre_ping=True,
-        # Le pooler Supabase en mode transaction ne conserve pas les requêtes préparées.
+        # The Supabase pooler in transaction mode does not keep prepared statements.
         connect_args={"prepare_threshold": None},
     )
 

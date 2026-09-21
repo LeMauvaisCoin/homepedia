@@ -42,7 +42,7 @@ const createQueryKey = <TOptions extends Options>(id: string, options?: TOptions
 export const getHealthQueryKey = (options?: Options<GetHealthData>) => createQueryKey('getHealth', options);
 
 /**
- * Vérifier que l'API répond
+ * Check that the API responds
  */
 export const getHealthOptions = (options?: Options<GetHealthData>) => queryOptions<GetHealthResponse, GetHealthError, GetHealthResponse, ReturnType<typeof getHealthQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -60,7 +60,7 @@ export const getHealthOptions = (options?: Options<GetHealthData>) => queryOptio
 export const getReadinessQueryKey = (options?: Options<GetReadinessData>) => createQueryKey('getReadiness', options);
 
 /**
- * Vérifier que l'API atteint la base de données
+ * Check that the API reaches the database
  */
 export const getReadinessOptions = (options?: Options<GetReadinessData>) => queryOptions<GetReadinessResponse, GetReadinessError, GetReadinessResponse, ReturnType<typeof getReadinessQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -78,7 +78,7 @@ export const getReadinessOptions = (options?: Options<GetReadinessData>) => quer
 export const listTerritoriesQueryKey = (options?: Options<ListTerritoriesData>) => createQueryKey('listTerritories', options);
 
 /**
- * Lister les territoires
+ * List territories
  */
 export const listTerritoriesOptions = (options?: Options<ListTerritoriesData>) => queryOptions<ListTerritoriesResponse, ListTerritoriesError, ListTerritoriesResponse, ReturnType<typeof listTerritoriesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -125,7 +125,7 @@ const createInfiniteParams = <K extends Pick<QueryKey<Options>[0], 'body' | 'hea
 export const listTerritoriesInfiniteQueryKey = (options?: Options<ListTerritoriesData>): QueryKey<Options<ListTerritoriesData>> => createQueryKey('listTerritories', options, true);
 
 /**
- * Lister les territoires
+ * List territories
  */
 export const listTerritoriesInfiniteOptions = (options?: Options<ListTerritoriesData>) => {
     const opts = infiniteQueryOptions<ListTerritoriesResponse, ListTerritoriesError, InfiniteData<ListTerritoriesResponse>, QueryKey<Options<ListTerritoriesData>>, number | Pick<QueryKey<Options<ListTerritoriesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(

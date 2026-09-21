@@ -16,7 +16,7 @@
       "InvalidParameter": {
         "properties": {
           "location": {
-            "description": "Emplacement du paramètre fautif.",
+            "description": "Location of the invalid parameter.",
             "examples": [
               "query.limit"
             ],
@@ -39,7 +39,7 @@
         "type": "object"
       },
       "Problem": {
-        "description": "Erreur structurée, au format RFC 9457.",
+        "description": "Structured error, in the RFC 9457 format.",
         "properties": {
           "detail": {
             "anyOf": [
@@ -68,14 +68,14 @@
           },
           "title": {
             "examples": [
-              "Paramètres invalides"
+              "Invalid parameters"
             ],
             "title": "Title",
             "type": "string"
           },
           "type": {
             "default": "about:blank",
-            "description": "Identifiant du type d'erreur.",
+            "description": "Identifier of the error type.",
             "title": "Type",
             "type": "string"
           }
@@ -90,7 +90,7 @@
       "Territory": {
         "properties": {
           "code": {
-            "description": "Code officiel géographique, conservé en chaîne (zéros initiaux).",
+            "description": "Official geographic code, kept as a string (leading zeros).",
             "examples": [
               "01053"
             ],
@@ -150,7 +150,7 @@
                 "type": "null"
               }
             ],
-            "description": "Population municipale.",
+            "description": "Municipal population.",
             "examples": [
               42372
             ],
@@ -202,7 +202,7 @@
             "type": "integer"
           },
           "total": {
-            "description": "Nombre de territoires correspondant aux filtres.",
+            "description": "Number of territories matching the filters.",
             "title": "Total",
             "type": "integer"
           }
@@ -219,7 +219,7 @@
     }
   },
   "info": {
-    "description": "Exploration immobilière territoriale.",
+    "description": "Territorial real estate exploration.",
     "title": "Homepedia API",
     "version": "0.1.0"
   },
@@ -251,9 +251,9 @@
             "description": "Internal Server Error"
           }
         },
-        "summary": "Vérifier que l'API répond",
+        "summary": "Check that the API responds",
         "tags": [
-          "santé"
+          "health"
         ]
       }
     },
@@ -294,9 +294,9 @@
             "description": "Service Unavailable"
           }
         },
-        "summary": "Vérifier que l'API atteint la base de données",
+        "summary": "Check that the API reaches the database",
         "tags": [
-          "santé"
+          "health"
         ]
       }
     },
@@ -305,7 +305,7 @@
         "operationId": "listTerritories",
         "parameters": [
           {
-            "description": "Niveau territorial.",
+            "description": "Territorial level.",
             "in": "query",
             "name": "level",
             "required": false,
@@ -323,12 +323,12 @@
                   "type": "null"
                 }
               ],
-              "description": "Niveau territorial.",
+              "description": "Territorial level.",
               "title": "Level"
             }
           },
           {
-            "description": "Recherche sur le nom.",
+            "description": "Search on the name.",
             "in": "query",
             "name": "q",
             "required": false,
@@ -343,7 +343,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Recherche sur le nom.",
+              "description": "Search on the name.",
               "examples": [
                 "lyon"
               ],
@@ -419,9 +419,9 @@
             "description": "Service Unavailable"
           }
         },
-        "summary": "Lister les territoires",
+        "summary": "List territories",
         "tags": [
-          "territoires"
+          "territories"
         ]
       }
     }

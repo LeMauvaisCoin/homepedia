@@ -1,4 +1,4 @@
-"""Exporte le contrat OpenAPI sans base de données ni variable d'environnement."""
+"""Export the OpenAPI contract without a database or any environment variable."""
 
 import json
 import sys

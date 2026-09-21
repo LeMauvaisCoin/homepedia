@@ -29,8 +29,11 @@ apps/api (Pydantic, FastAPI)
   nomme les fonctions du client et les pages de documentation.
 - Descriptions et exemples dans le code Python (`Field(description=…,
 examples=…)`), pas dans un fichier à part.
-- Listes paginées : `limit`/`offset` bornés, réponse `{ items, total, limit,
-offset }`.
+- Résumés, descriptions et messages d'erreur en anglais, comme le reste du
+  code.
+- Listes paginées : `PaginationDep` (`homepedia_api.pagination`) porte
+  `limit`/`offset` bornés de la route jusqu'au repository ; réponse
+  `{ items, total, limit, offset }`.
 - Erreurs au format `application/problem+json` (RFC 9457) via
   `homepedia_api.errors.Problem`, déclarées dans `responses` pour apparaître
   dans le contrat.

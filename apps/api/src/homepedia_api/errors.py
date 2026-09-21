@@ -16,15 +16,17 @@ logger = logging.getLogger(__name__)
 
 
 class InvalidParameter(BaseModel):
-    location: str = Field(description="Emplacement du paramètre fautif.", examples=["query.limit"])
+    location: str = Field(
+        description="Location of the invalid parameter.", examples=["query.limit"]
+    )
     message: str = Field(examples=["Input should be less than or equal to 100"])
 
 
 class Problem(BaseModel):
-    """Erreur structurée, au format RFC 9457."""
+    """Structured error, in the RFC 9457 format."""
 
-    type: str = Field(default="about:blank", description="Identifiant du type d'erreur.")
-    title: str = Field(examples=["Paramètres invalides"])
+    type: str = Field(default="about:blank", description="Identifier of the error type.")
+    title: str = Field(examples=["Invalid parameters"])
     status: int = Field(examples=[422])
     detail: str | None = None
     errors: list[InvalidParameter] = Field(default_factory=list)
@@ -48,7 +50,7 @@ async def _validation_handler(_request: Request, exc: Exception) -> JSONResponse
         )
         for error in exc.errors()
     ]
-    return _problem_response(Problem(title="Paramètres invalides", status=422, errors=errors))
+    return _problem_response(Problem(title="Invalid parameters", status=422, errors=errors))
 
 
 async def _http_handler(_request: Request, exc: Exception) -> JSONResponse:
@@ -58,22 +60,22 @@ async def _http_handler(_request: Request, exc: Exception) -> JSONResponse:
 
 
 async def _database_unavailable_handler(_request: Request, exc: Exception) -> JSONResponse:
-    # Le message du pilote nomme l'hôte et le port : il va dans les logs, pas dans la réponse.
-    logger.error("Base de données injoignable : %s", exc)
+    # The driver message names the host and port: it goes to the logs, not to the response.
+    logger.error("Database unreachable: %s", exc)
     return _problem_response(
         Problem(
-            title="Service indisponible",
+            title="Service unavailable",
             status=503,
-            detail="La base de données est injoignable. Réessayez dans quelques instants.",
+            detail="The database is unreachable. Try again in a moment.",
         )
     )
 
 
 class UnhandledErrorMiddleware:
-    """Répond 500 au format du contrat quand une exception n'a aucun gestionnaire.
+    """Answer 500 in the contract format when an exception has no handler.
 
-    Un gestionnaire `Exception` classique répondrait depuis `ServerErrorMiddleware`, à
-    l'extérieur du middleware CORS : le navigateur masquerait la réponse au frontend.
+    A regular `Exception` handler would answer from `ServerErrorMiddleware`, outside the
+    CORS middleware: the browser would hide the response from the frontend.
     """
 
     def __init__(self, app: ASGIApp) -> None:
@@ -97,8 +99,8 @@ class UnhandledErrorMiddleware:
         except Exception:
             if response_started:
                 raise
-            logger.exception("Erreur inattendue sur %s %s", scope["method"], scope["path"])
-            response = _problem_response(Problem(title="Erreur interne", status=500))
+            logger.exception("Unexpected error on %s %s", scope["method"], scope["path"])
+            response = _problem_response(Problem(title="Internal error", status=500))
             await response(scope, receive, send)
 
 

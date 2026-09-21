@@ -7,14 +7,14 @@ from sqlalchemy import select
 from homepedia_api.db import ConnectionDep
 from homepedia_api.errors import PROBLEM_RESPONSE
 
-router = APIRouter(tags=["santé"])
+router = APIRouter(tags=["health"])
 
 
 class Health(BaseModel):
     status: Literal["ok"] = "ok"
 
 
-@router.get("/health", operation_id="getHealth", summary="Vérifier que l'API répond")
+@router.get("/health", operation_id="getHealth", summary="Check that the API responds")
 async def get_health() -> Health:
     return Health()
 
@@ -22,7 +22,7 @@ async def get_health() -> Health:
 @router.get(
     "/health/ready",
     operation_id="getReadiness",
-    summary="Vérifier que l'API atteint la base de données",
+    summary="Check that the API reaches the database",
     responses={503: PROBLEM_RESPONSE},
 )
 async def get_readiness(connection: ConnectionDep) -> Health:

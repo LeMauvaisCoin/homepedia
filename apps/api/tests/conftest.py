@@ -9,7 +9,7 @@ from homepedia_api.main import create_app
 
 @pytest.fixture
 def offline_client() -> TestClient:
-    """Client sans base : le cycle de vie n'est pas démarré, la connexion est remplacée."""
+    """Client without a database: the lifespan is not started, the connection is overridden."""
     app = create_app()
     app.dependency_overrides[get_connection] = lambda: None
     return TestClient(app)

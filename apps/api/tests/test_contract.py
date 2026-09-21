@@ -51,9 +51,9 @@ def test_unexpected_error_returns_a_structured_problem() -> None:
 
     assert response.status_code == 500
     assert response.headers["content-type"] == "application/problem+json"
-    assert response.json()["title"] == "Erreur interne"
+    assert response.json()["title"] == "Internal error"
     assert "s3cret" not in response.text
-    # Sans cet en-tête, le navigateur masque la réponse au frontend.
+    # Without this header, the browser hides the response from the frontend.
     assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
 
 
@@ -64,7 +64,7 @@ def test_unreachable_database_returns_503() -> None:
 
     assert response.status_code == 503
     assert response.headers["content-type"] == "application/problem+json"
-    assert response.json()["title"] == "Service indisponible"
+    assert response.json()["title"] == "Service unavailable"
     assert "connection refused" not in response.text
 
 

@@ -19,16 +19,16 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 };
 
 /**
- * Vérifier que l'API répond
+ * Check that the API responds
  */
 export const getHealth = <ThrowOnError extends boolean = false>(options?: Options<GetHealthData, ThrowOnError>): RequestResult<GetHealthResponses, GetHealthErrors, ThrowOnError> => (options?.client ?? client).get<GetHealthResponses, GetHealthErrors, ThrowOnError>({ url: '/health', ...options });
 
 /**
- * Vérifier que l'API atteint la base de données
+ * Check that the API reaches the database
  */
 export const getReadiness = <ThrowOnError extends boolean = false>(options?: Options<GetReadinessData, ThrowOnError>): RequestResult<GetReadinessResponses, GetReadinessErrors, ThrowOnError> => (options?.client ?? client).get<GetReadinessResponses, GetReadinessErrors, ThrowOnError>({ url: '/health/ready', ...options });
 
 /**
- * Lister les territoires
+ * List territories
  */
 export const listTerritories = <ThrowOnError extends boolean = false>(options?: Options<ListTerritoriesData, ThrowOnError>): RequestResult<ListTerritoriesResponses, ListTerritoriesErrors, ThrowOnError> => (options?.client ?? client).get<ListTerritoriesResponses, ListTerritoriesErrors, ThrowOnError>({ url: '/v1/territories', ...options });

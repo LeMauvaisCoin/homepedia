@@ -22,7 +22,7 @@ module-name = "homepedia_api"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = [
-  "integration: nécessite la base Supabase locale (bun run supabase:start)",
+  "integration: needs the local Supabase database (bun run supabase:start)",
 ]
 
 [dependency-groups]

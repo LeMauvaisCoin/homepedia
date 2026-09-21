@@ -21,7 +21,7 @@ export type InvalidParameter = {
     /**
      * Location
      *
-     * Emplacement du paramètre fautif.
+     * Location of the invalid parameter.
      */
     location: string;
     /**
@@ -33,7 +33,7 @@ export type InvalidParameter = {
 /**
  * Problem
  *
- * Erreur structurée, au format RFC 9457.
+ * Structured error, in the RFC 9457 format.
  */
 export type Problem = {
     /**
@@ -55,7 +55,7 @@ export type Problem = {
     /**
      * Type
      *
-     * Identifiant du type d'erreur.
+     * Identifier of the error type.
      */
     type?: string;
 };
@@ -67,7 +67,7 @@ export type Territory = {
     /**
      * Code
      *
-     * Code officiel géographique, conservé en chaîne (zéros initiaux).
+     * Official geographic code, kept as a string (leading zeros).
      */
     code: string;
     /**
@@ -93,7 +93,7 @@ export type Territory = {
     /**
      * Population
      *
-     * Population municipale.
+     * Municipal population.
      */
     population: number | null;
     /**
@@ -121,7 +121,7 @@ export type TerritoryPage = {
     /**
      * Total
      *
-     * Nombre de territoires correspondant aux filtres.
+     * Number of territories matching the filters.
      */
     total: number;
 };
@@ -187,13 +187,13 @@ export type ListTerritoriesData = {
         /**
          * Level
          *
-         * Niveau territorial.
+         * Territorial level.
          */
         level?: 'commune' | 'departement' | 'region' | null;
         /**
          * Q
          *
-         * Recherche sur le nom.
+         * Search on the name.
          */
         q?: string | null;
         /**
