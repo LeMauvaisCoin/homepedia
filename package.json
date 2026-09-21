@@ -13,9 +13,10 @@
   "scripts": {
     "prepare": "husky",
     "setup": "bun scripts/setup.ts",
-    "dev": "PORTLESS_PORT=1355 PORTLESS_LAN=0 portless proxy start --port 1355 --https && PORTLESS_PORT=1355 PORTLESS_LAN=0 turbo run dev --ui=stream",
-    "dev:web": "PORTLESS_PORT=1355 PORTLESS_LAN=0 portless proxy start --port 1355 --https && PORTLESS_PORT=1355 PORTLESS_LAN=0 turbo run dev --filter @homepedia/web",
-    "dev:api": "PORTLESS_PORT=1355 PORTLESS_LAN=0 portless proxy start --port 1355 --https && PORTLESS_PORT=1355 PORTLESS_LAN=0 turbo run dev --filter @homepedia/api",
+    "dev": "bun run dev:portless --ui=stream",
+    "dev:web": "bun run dev:portless --filter @homepedia/web",
+    "dev:api": "bun run dev:portless --filter @homepedia/api",
+    "dev:portless": "export PORTLESS_PORT=1355 PORTLESS_LAN=0 && portless proxy start --port $PORTLESS_PORT --https && turbo run dev",
     "build": "turbo run build",
     "check": "turbo run lint lint:root typecheck test",
     "lint": "turbo run lint lint:root",
