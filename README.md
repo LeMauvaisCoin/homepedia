@@ -18,7 +18,7 @@ Le [projet Linear Homepedia](https://linear.app/lemauvaiscoin/project/homepedia-
 
 ## Développement
 
-Dépôt principal : [leo-mathurin/homepedia](https://github.com/leo-mathurin/homepedia) (`origin`). Le remote `epitech` est réservé à la remise finale.
+Dépôt principal : [LeMauvaisCoin/homepedia](https://github.com/LeMauvaisCoin/homepedia) (`origin`). Le remote `epitech` est réservé à la remise finale.
 
 Branches persistantes : `main` pour la production, `staging` pour l’intégration testée uniquement en local. Backlog partagé, tâches prises librement et petites PR ; aucun domaine réservé.
 
