@@ -1,0 +1,38 @@
+[
+  {
+    "dataset_id": "5c4ae55a634f4117716d5656",
+    "dataset_title": "Demandes de valeurs foncières",
+    "dataset_page": "https://www.data.gouv.fr/datasets/demandes-de-valeurs-foncieres",
+    "num_resources": 9
+  },
+  {
+    "dataset_id": "5cc1b94a634f4165e96436c1",
+    "dataset_title": "Demandes de valeurs foncières géolocalisées",
+    "dataset_page": "https://www.data.gouv.fr/datasets/demandes-de-valeurs-foncieres-geolocalisees",
+    "num_resources": 3
+  },
+  {
+    "dataset_id": "59b0020ec751df07d5f13bcf",
+    "dataset_title": "Cadastre",
+    "dataset_page": "https://www.data.gouv.fr/datasets/cadastre",
+    "num_resources": 2
+  },
+  {
+    "dataset_id": "5530fbacc751df5ff937dddb",
+    "dataset_title": "Base Adresse Nationale",
+    "dataset_page": "https://www.data.gouv.fr/datasets/base-adresse-nationale",
+    "num_resources": 4
+  },
+  {
+    "dataset_id": "61dc7157488f8cdb4283e3c3",
+    "dataset_title": "Base de données nationale des bâtiments  ",
+    "dataset_page": "https://www.data.gouv.fr/datasets/base-de-donnees-nationale-des-batiments",
+    "num_resources": 5
+  },
+  {
+    "dataset_id": "62da71c068871f4c54258c7c",
+    "dataset_title": "Registre national d'Immatriculation des Copropriétés",
+    "dataset_page": "https://www.data.gouv.fr/datasets/registre-national-dimmatriculation-des-coproprietes",
+    "num_resources": 18
+  }
+]
