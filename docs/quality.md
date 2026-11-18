@@ -2,19 +2,19 @@
 
 ## Outils
 
-| Domaine            | Outil                                                                | Configuration                     |
-| ------------------ | -------------------------------------------------------------------- | --------------------------------- |
-| Lint TypeScript    | Oxlint + `oxlint-tsgolint` (règles typées et erreurs de compilation) | `.oxlintrc.json`                  |
-| Anti-slop          | Plugin vendorisé `tools/oxlint/anti-slop`                            | `.oxlintrc.json`                  |
-| Interface          | `@shadcn/lint`, sur `apps/web/src`                                   | `.oxlintrc.json`                  |
-| Formatage          | Oxfmt (TS, JSON, Markdown, YAML, CSS, TOML) ; Ruff pour Python       | `.oxfmtrc.json`, `pyproject.toml` |
-| Typecheck          | `tsc` de TypeScript 7 ; `ty` pour Python                             | `tsconfig.base.json`              |
-| Lint Python        | Ruff                                                                 | `pyproject.toml`                  |
-| Code mort          | Knip                                                                 | `knip.jsonc`                      |
-| Messages de commit | commitlint, Conventional Commits                                     | `commitlint.config.mjs`           |
+| Domaine            | Outil                                                          | Configuration                     |
+| ------------------ | -------------------------------------------------------------- | --------------------------------- |
+| Lint TypeScript    | Oxlint + `tsrs` (règles typées et erreurs de compilation)      | `.oxlintrc.json`                  |
+| Anti-slop          | Plugin vendorisé `tools/oxlint/anti-slop`                      | `.oxlintrc.json`                  |
+| Interface          | `@shadcn/lint`, sur `apps/web/src`                             | `.oxlintrc.json`                  |
+| Formatage          | Oxfmt (TS, JSON, Markdown, YAML, CSS, TOML) ; Ruff pour Python | `.oxfmtrc.json`, `pyproject.toml` |
+| Typecheck          | `tsc` de TypeScript 7 ; `ty` pour Python                       | `tsconfig.base.json`              |
+| Lint Python        | Ruff                                                           | `pyproject.toml`                  |
+| Code mort          | Knip                                                           | `knip.jsonc`                      |
+| Messages de commit | commitlint, Conventional Commits                               | `commitlint.config.mjs`           |
 
 Versions épinglées ensemble : `oxlint` et `@oxlint/plugins` à la même version,
-`oxlint-tsgolint` et `typescript` 7. Les mettre à jour dans la même PR.
+`tsrs` et `typescript` 7. Les mettre à jour dans la même PR.
 
 Le code généré n'est ni linté ni formaté : `packages/api-client/src/generated`
 pour Oxlint et Oxfmt, `apps/api/src/homepedia_api/tables.py` pour Ruff
