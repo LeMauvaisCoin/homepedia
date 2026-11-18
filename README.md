@@ -18,7 +18,9 @@ Le [projet Linear Homepedia](https://linear.app/lemauvaiscoin/project/homepedia-
 
 ## Développement
 
-Dépôt principal : [LeMauvaisCoin/homepedia](https://github.com/LeMauvaisCoin/homepedia) (`origin`). Le remote `epitech` est réservé à la remise finale.
+Dépôt principal : [LeMauvaisCoin/homepedia](https://github.com/LeMauvaisCoin/homepedia) (`origin`). Le [workflow GitHub Actions](.github/workflows/mirror-epitech.yml) copie toutes les branches et tous les tags vers le [dépôt Epitech](https://github.com/EpitechMscProPromo2027/T-DAT-901-LYN-9-1-homepedia-12). Il démarre au push sur une branche qui contient le workflow, à la suppression d'une branche, manuellement et toutes les 15 minutes pour rattraper les branches plus anciennes. Pour synchroniser immédiatement une branche ancienne ou un tag, lancer manuellement **Epitech mirror** depuis `main` dans GitHub Actions. Ce dépôt est un miroir : ses modifications directes seront écrasées ou supprimées lors de la synchronisation suivante.
+
+Le secret GitHub Actions `EPITECH_MIRROR_TOKEN` porte l'accès au dépôt Epitech. Il contient un token classique avec les scopes `repo` et `workflow`, autorisé par le SSO d'Epitech. Renouveler le token et le secret avant son expiration, le 16 février 2027, puis lancer manuellement le workflow pour vérifier le nouvel accès.
 
 Branches persistantes : `main` pour la production, `staging` pour l’intégration testée uniquement en local. Backlog partagé, tâches prises librement et petites PR ; aucun domaine réservé.
 
