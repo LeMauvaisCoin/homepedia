@@ -3,6 +3,8 @@
   "workspaces": {
     ".": {
       "entry": ["scripts/*.ts"],
+      // Oxlint loads tsrs for type-aware rules.
+      "ignoreDependencies": ["tsrs"],
       // uv is installed outside npm; the anti-slop plugin is a vendored copy.
       "ignoreBinaries": ["uv"],
       "ignore": ["tools/oxlint/anti-slop/**"],
