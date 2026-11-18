@@ -15,7 +15,6 @@ const router = createRouter({
   routeTree,
   context: { queryClient },
   defaultPreload: "intent",
-  // The cache belongs to TanStack Query: the router keeps nothing stale.
   defaultPreloadStaleTime: 0,
 });
 

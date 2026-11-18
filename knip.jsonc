@@ -3,8 +3,9 @@
   "workspaces": {
     ".": {
       "entry": ["scripts/*.ts"],
-      // Oxlint loads tsrs for type-aware rules.
-      "ignoreDependencies": ["tsrs"],
+      // Oxlint loads tsrs for type-aware rules, and .oxlintrc.json loads
+      // Landmines through "extends", which Knip does not follow.
+      "ignoreDependencies": ["tsrs", "@interfere/landmines"],
       // uv is installed outside npm; the anti-slop plugin is a vendored copy.
       "ignoreBinaries": ["uv"],
       "ignore": ["tools/oxlint/anti-slop/**"],
