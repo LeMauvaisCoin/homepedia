@@ -1,6 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// Dedicated ports: the scenarios leave the `bun run dev` servers alone.
 const API_URL = "http://127.0.0.1:8100";
 
 const WEB_URL = "http://127.0.0.1:4173";
@@ -26,7 +25,7 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: [
     {
-      // Needs the local database: `bun run supabase:start`.
+      /** Needs the local database: `bun run supabase:start`. */
       command:
         "uv run uvicorn homepedia_api.main:create_configured_app --factory --host 127.0.0.1 --port 8100",
       cwd: "../api",

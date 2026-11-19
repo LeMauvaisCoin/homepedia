@@ -5,9 +5,6 @@ import { execFileSync } from "node:child_process";
 import { type Plugin, defineConfig, loadEnv } from "vite";
 import { parseClientEnv } from "./src/env-schema.ts";
 
-// Stops `vite dev`, `vite build` and `vite preview` when a variable of the
-// current mode is missing. In a hook: tools that only read this configuration
-// (Knip) do not need a .env file.
 const validateEnv: Plugin = {
   name: "homepedia:validate-env",
   configResolved(config) {
@@ -48,9 +45,7 @@ export default defineConfig(({ command, isPreview, mode }) => {
     server: {
       port: 5173,
       strictPort: true,
-      // HMR ping interval. Over Tailscale, a silent WebSocket is cut after
-      // 10 s and the Vite client then reloads the page: the 30 s default
-      // caused a reload loop.
+      // WARNING: Tailscale cuts a silent WebSocket after 10 s; the 30 s HMR default caused a reload loop.
       hmr: { timeout: 5000 },
       allowedHosts:
         portlessDev && process.env.PORTLESS_TAILSCALE_URL

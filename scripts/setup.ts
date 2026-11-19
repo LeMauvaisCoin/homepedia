@@ -1,4 +1,3 @@
-// Prepares a fresh clone: local .env files and the Python environment.
 import { copyFile } from "node:fs/promises";
 import { $ } from "bun";
 
