@@ -23,3 +23,6 @@ supabase/.temp/
 playwright-report/
 test-results/
 blob-report/
+
+# Downloads of the data trials (scripts/essais).
+.cache/
