@@ -12,12 +12,12 @@ Downloads are cached in `.cache/lem-8/`.
 """
 
 import csv
+import http.client
 import io
 import re
 import sys
 import time
-import urllib.error
-import urllib.request
+import urllib.parse
 from collections import Counter
 from pathlib import Path
 
@@ -137,15 +137,30 @@ YANPORT = (
 )
 
 
+def https_get(url: str) -> tuple[int, bytes]:
+    """GET an HTTPS URL with the project user agent, following redirects."""
+    for _ in range(5):
+        parts = urllib.parse.urlsplit(url)
+        if parts.scheme != "https":
+            raise ValueError(f"Refusing non-HTTPS URL {url}")
+        connection = http.client.HTTPSConnection(parts.netloc, timeout=30)
+        try:
+            target = f"{parts.path or '/'}?{parts.query}" if parts.query else parts.path or "/"
+            connection.request("GET", target, headers={"User-Agent": USER_AGENT})
+            response = connection.getresponse()
+            if response.status in (301, 302, 303, 307, 308) and response.headers["Location"]:
+                url = urllib.parse.urljoin(url, response.headers["Location"])
+                continue
+            return response.status, response.read()
+        finally:
+            connection.close()
+    raise OSError(f"Too many redirects for {url}")
+
+
 def fetch(url: str) -> tuple[int, bytes]:
     """GET once with the project user agent. Returns the status even on HTTP errors."""
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})  # noqa: S310
     time.sleep(DELAY_SECONDS)
-    try:
-        with urllib.request.urlopen(request, timeout=30) as response:  # noqa: S310
-            return response.status, response.read()
-    except urllib.error.HTTPError as error:
-        return error.code, error.read()
+    return https_get(url)
 
 
 def cached(url: str, name: str) -> tuple[int, bytes]:
@@ -266,7 +281,7 @@ def portals() -> None:
             ]
         )
     table(
-        f"Portails : robots.txt et page de conditions (agent `{USER_AGENT}`)",
+        f"Portals: robots.txt and terms page (agent `{USER_AGENT}`)",
         ["portal", "robots.txt", "`*` group", "representative URLs", "comment", "terms page"],
         rows,
     )
@@ -288,7 +303,7 @@ def bailleurverif() -> None:
     )
     fields = ["surface_m2", "loyer_eur_total", "dpe_letter", "ges_letter", "meuble", "code_postal"]
     table(
-        "BailleurVérif, fichier cumulatif",
+        "BailleurVérif, cumulative file",
         ["measure", "value"],
         [
             ["rows", len(rows)],
@@ -326,7 +341,7 @@ def yanport() -> None:
             totals[(row["Portail"], row["Type"])] += int(row["Nombre d'annonces"])
     portals_seen = sorted({portal for portal, _ in totals}, key=lambda p: -totals[(p, "VENTE")])
     table(
-        "Yanport, stock d'annonces par portail, juin 2019 (métropole)",
+        "Yanport, listing stock per portal, June 2019 (mainland France)",
         ["portal", "sale listings", "rental listings"],
         [[p, f"{totals[(p, 'VENTE')]:,}", f"{totals[(p, 'LOCATION')]:,}"] for p in portals_seen]
         + [

@@ -13,17 +13,16 @@ and emails are never kept. Prints Markdown tables to stdout.
 """
 
 import html
+import http.client
 import json
 import math
 import re
 import sys
 import time
-import urllib.error
-import urllib.request
+import urllib.parse
 from collections import Counter
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
 
 import truststore
 
@@ -42,14 +41,33 @@ CENTROID_METRES = 300
 ARRONDISSEMENT = re.compile(r"^(751(0[1-9]|1\d|20)|132(0[1-9]|1[0-6])|6938[1-9])$")
 
 
-def fetch(url: str) -> str:
+def https_get(url: str) -> tuple[int, bytes]:
+    """GET an HTTPS URL with the project user agent, following redirects."""
+    for _ in range(5):
+        parts = urllib.parse.urlsplit(url)
+        if parts.scheme != "https":
+            raise ValueError(f"Refusing non-HTTPS URL {url}")
+        connection = http.client.HTTPSConnection(parts.netloc, timeout=30)
+        try:
+            target = f"{parts.path or '/'}?{parts.query}" if parts.query else parts.path or "/"
+            connection.request("GET", target, headers={"User-Agent": USER_AGENT})
+            response = connection.getresponse()
+            if response.status in (301, 302, 303, 307, 308) and response.headers["Location"]:
+                url = urllib.parse.urljoin(url, response.headers["Location"])
+                continue
+            return response.status, response.read()
+        finally:
+            connection.close()
+    raise OSError(f"Too many redirects for {url}")
+
+
+def fetch(url: str) -> tuple[int, str]:
     time.sleep(DELAY_SECONDS)
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})  # noqa: S310
-    with urllib.request.urlopen(request, timeout=30) as response:  # noqa: S310
-        return response.read().decode("utf-8", "replace")
+    status, body = https_get(url)
+    return status, body.decode("utf-8", "replace")
 
 
-def cached_json(name: str, build: Callable[[], Any]) -> Any:  # noqa: ANN401
+def cached_json[T](name: str, build: Callable[[], T]) -> T:
     path = CACHE / f"{name}.json"
     if path.exists():
         return json.loads(path.read_text())
@@ -76,7 +94,9 @@ def after(lines: list[str], label: str) -> str | None:
 
 
 def list_page(path: str) -> dict:
-    page = fetch(SITE + path)
+    status, page = fetch(SITE + path)
+    if status >= 400:
+        raise OSError(f"HTTP {status} for {path}")
     links = sorted(set(re.findall(r'href="(/biens/[^"?#]+)"', page)))
     pages = [int(n) for n in re.findall(r'href="\?page=(\d+)"', page)]
     return {"links": links, "last_page": max(pages, default=0)}
@@ -102,10 +122,9 @@ def sanitize(lines: list[str]) -> list[str]:
 
 
 def listing(path: str) -> dict:
-    try:
-        page = fetch(SITE + path)
-    except urllib.error.HTTPError as error:
-        return {"path": path, "http_status": error.code}
+    status, page = fetch(SITE + path)
+    if status >= 400:
+        return {"path": path, "http_status": status}
     lat = re.search(r'data-lat="([-0-9.]+)"', page)
     lon = re.search(r'data-lon="([-0-9.]+)"', page)
     return {
@@ -142,9 +161,10 @@ def parse_listing(record: dict) -> dict:
 def centre(code: str) -> tuple[float, float] | None:
     for kind in ("commune-actuelle", "arrondissement-municipal"):
         url = f"{GEO}/communes?code={code}&type={kind}&fields=centre"
-        request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})  # noqa: S310
-        with urllib.request.urlopen(request, timeout=30) as response:  # noqa: S310
-            found = json.loads(response.read())
+        status, body = https_get(url)
+        if status >= 400:
+            raise OSError(f"HTTP {status} for {url}")
+        found = json.loads(body)
         if found:
             lon, lat = found[0]["centre"]["coordinates"]
             return lat, lon
@@ -206,7 +226,7 @@ def main() -> None:
     sold_paths = set(paths["sold"])
 
     table(
-        "Volume visible",
+        "Visible volume",
         ["list", "pages read", "distinct listing links", "last page number"],
         [
             [kind, len(pages), len(paths[kind]), pages[0]["last_page"]]
@@ -216,7 +236,7 @@ def main() -> None:
 
     fields = [k for k in records[0] if k != "path"] if records else []
     table(
-        f"Complétude sur {len(records)} fiches",
+        f"Completeness over {len(records)} listings",
         ["field", "filled", "examples"],
         [
             [
@@ -230,7 +250,7 @@ def main() -> None:
 
     statuses = Counter((r["path"] in sold_paths, r.get("status")) for r in records)
     table(
-        "Statut affiché",
+        "Displayed status",
         ["from list", "status", "listings"],
         [
             ["sold" if sold else "active", s, n]
@@ -251,7 +271,7 @@ def main() -> None:
                 located += 1
                 centroid += metres(point, (r["lat"], r["lon"])) < CENTROID_METRES
     table(
-        "Doublons et localisation",
+        "Duplicates and location",
         ["measure", "value"],
         [
             ["duplicate references", sum(n - 1 for n in references.values() if n > 1)],
