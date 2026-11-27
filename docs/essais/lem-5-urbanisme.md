@@ -38,7 +38,7 @@ lancement : environ 10 minutes, surtout l'OCR. Mesures du 27 novembre 2026.
 | `scripts/essais/lem_5.py`              | Couverture GPU, corpus, texte (PyMuPDF, pypdf, OCR), scans tournés      |
 | `scripts/essais/lem_5_reglement.py`    | Passages classés, champs structurés, précision et rappel par jeu        |
 | `scripts/essais/lem_5_gpu.py`          | Zonage et prescriptions (WFS), RNU, carte communale, en-têtes de quotas |
-| `scripts/essais/lem_5_annotations.csv` | Échantillon annoté : 205 lignes, colonne `split` (`dev` ou `test`)      |
+| `scripts/essais/lem_5_annotations.csv` | Échantillon annoté : 191 lignes, colonne `split` (`dev` ou `test`)      |
 
 L'OCR utilise le moteur Tesseract intégré à PyMuPDF et le modèle
 `fra.traineddata` de `tessdata_best`, à 300 dpi. Aucun appel à un modèle de
@@ -301,7 +301,7 @@ graphique », « renvoi aux dispositions générales ») avec le passage.
 
 **Limites.**
 
-- Six règlements, 205 annotations faites par un agent ; effectifs par thème et
+- Six règlements, 191 annotations faites par un agent ; effectifs par thème et
   par champ petits (intervalles larges).
 - Une seule version par document ; stabilité des identifiants GPU non suivie.
 - OAP et PSMV (qui priment dans leur périmètre à Paris, Lyon et Strasbourg) non
