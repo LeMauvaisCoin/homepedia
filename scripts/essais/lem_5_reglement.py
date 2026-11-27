@@ -197,9 +197,9 @@ def same(expected: str, found: str) -> bool:
         return expected == found
 
 
-def annotations(kind: str) -> list[dict]:
+def annotations(kind: str, split: str) -> list[dict]:
     with ANNOTATIONS.open() as file:
-        return [row for row in csv.DictReader(file) if row["kind"] == kind]
+        return [row for row in csv.DictReader(file) if (row["kind"], row["split"]) == (kind, split)]
 
 
 def main() -> None:
@@ -224,51 +224,95 @@ def main() -> None:
         rows,
     )
 
+    for split in ("dev", "test"):
+        passages(segmented, split)
+        fields(segmented, split)
+
+
+def ratio(part: int, whole: int) -> str:
+    return f"{part / whole:.0%}" if whole else "-"
+
+
+def passages(segmented: dict[str, list[Line]], split: str) -> None:
+    """Zone and theme accuracy, then per-theme precision and recall."""
     scores: dict[str, Counter[str]] = defaultdict(Counter)
-    errors = []
-    for ref in annotations("passage"):
+    pairs, errors = [], []
+    for ref in annotations("passage", split):
         line = find_line(segmented[ref["file"]], int(ref["page"]), ref["passage"])
+        zone, theme = (line.zone, line.theme) if line else ("not found", "not found")
         score = scores[ref["file"]]
         score["total"] += 1
-        if line is None:
-            score["not found"] += 1
-            errors.append([ref["file"], ref["page"], ref["passage"][:50], "line not found", ""])
-            continue
-        score["zone"] += line.zone == ref["zone"]
-        score["theme"] += line.theme == ref["label"]
-        score["both"] += line.zone == ref["zone"] and line.theme == ref["label"]
-        if (line.zone, line.theme) != (ref["zone"], ref["label"]):
+        score["zone"] += zone == ref["zone"]
+        score["theme"] += theme == ref["label"]
+        score["both"] += (zone, theme) == (ref["zone"], ref["label"])
+        pairs.append((ref["label"], theme))
+        if (zone, theme) != (ref["zone"], ref["label"]):
             errors.append(
                 [
                     ref["file"],
                     ref["page"],
                     ref["passage"][:50],
                     f"{ref['zone']} / {ref['label']}",
-                    f"{line.zone} / {line.theme}",
+                    f"{zone} / {theme}",
                 ]
             )
     total = sum(scores.values(), Counter())
     table(
-        "Passage classification (zone and theme of annotated lines)",
+        f"Passage classification, {split} split",
         ["file", "lines", "zone correct", "theme correct", "both correct"],
         [
             [name, s["total"], s["zone"], s["theme"], s["both"]]
             for name, s in [*scores.items(), ("**total**", total)]
         ],
     )
-    table("Passage classification errors", ["file", "page", "line", "expected", "found"], errors)
+    table(
+        f"Passage classification errors, {split} split",
+        ["file", "page", "line", "expected", "found"],
+        errors,
+    )
+    rows, precisions, recalls = [], [], []
+    for theme in sorted({gold for gold, _ in pairs}):
+        hits = sum(gold == found == theme for gold, found in pairs)
+        predicted = sum(found == theme for _, found in pairs)
+        expected = sum(gold == theme for gold, _ in pairs)
+        precision = hits / predicted if predicted else 0.0
+        precisions.append(precision)
+        recalls.append(hits / expected)
+        rows.append(
+            [theme, expected, predicted, hits, ratio(hits, predicted), ratio(hits, expected)]
+        )
+    rows.append(
+        [
+            "**macro average**",
+            len(pairs),
+            "",
+            "",
+            f"{sum(precisions) / len(precisions):.0%}",
+            f"{sum(recalls) / len(recalls):.0%}",
+        ]
+    )
+    table(
+        f"Theme precision and recall, {split} split",
+        ["theme", "expected", "predicted", "correct", "precision", "recall"],
+        rows,
+    )
 
-    rows, by_field = [], defaultdict(Counter)
-    for ref in annotations("field"):
+
+def fields(segmented: dict[str, list[Line]], split: str) -> None:
+    """Per annotation result, then precision and recall of numbers and of status codes."""
+    rows, counts = [], defaultdict(Counter)
+    for ref in annotations("field", split):
         found, page = extract(segmented[ref["file"]], ref["zone"], ref["label"])
         ok = same(ref["expected"], found)
-        numeric = ref["expected"][0].isdigit()
-        by_field[ref["label"]]["total"] += 1
-        by_field[ref["label"]]["correct"] += ok
-        by_field[ref["label"]]["numeric"] += numeric
-        by_field[ref["label"]]["numeric correct"] += ok and numeric
-        # Worst case for a user: a number shown where the rule gives another one or none.
-        by_field[ref["label"]]["wrong number"] += not ok and found[0].isdigit()
+        for key in (ref["label"], "**total**"):
+            c = counts[key]
+            c["total"] += 1
+            c["correct"] += ok
+            kind_expected = "number" if ref["expected"][0].isdigit() else "status"
+            kind_found = "number" if found[0].isdigit() else "status"
+            c[f"{kind_expected} expected"] += 1
+            c[f"{kind_found} shown"] += 1
+            c[f"{kind_found} correct"] += ok
         rows.append(
             [
                 ref["file"][:14],
@@ -281,32 +325,36 @@ def main() -> None:
             ]
         )
     table(
-        "Structured fields, one row per annotation",
+        f"Structured fields, {split} split, one row per annotation",
         ["file", "zone", "field", "expected", "extracted", "page", "result"],
         rows,
     )
     table(
-        "Structured fields, error rate",
+        f"Structured fields, {split} split: accuracy, precision and recall",
         [
             "field",
             "annotations",
             "correct",
-            "error rate",
-            "numeric expected",
-            "numeric correct",
-            "wrong number shown",
+            "numbers shown",
+            "number precision",
+            "number recall",
+            "status shown",
+            "status precision",
+            "status recall",
         ],
         [
             [
                 field,
                 c["total"],
-                c["correct"],
-                f"{1 - c['correct'] / c['total']:.0%}",
-                c["numeric"],
-                c["numeric correct"],
-                c["wrong number"],
+                f"{c['correct']} ({ratio(c['correct'], c['total'])})",
+                c["number shown"],
+                ratio(c["number correct"], c["number shown"]),
+                ratio(c["number correct"], c["number expected"]),
+                c["status shown"],
+                ratio(c["status correct"], c["status shown"]),
+                ratio(c["status correct"], c["status expected"]),
             ]
-            for field, c in [*by_field.items(), ("**total**", sum(by_field.values(), Counter()))]
+            for field, c in sorted(counts.items(), key=lambda item: item[0] == "**total**")
         ],
     )
 

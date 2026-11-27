@@ -31,6 +31,8 @@ ANNOTATIONS = Path(__file__).with_name("lem_5_annotations.csv")
 EMPTY_PAGE_CHARS = 50
 OCR_DPI = 300
 NATIVE_PAGES_OCRED = 3
+# Native règlement ending with scanned annexes turned by 90 degrees.
+ROTATED = ("eee143f619882c020cfb0fbd52e178b7", "97411_reglement_20260805.pdf")
 
 # Pinned corpus: (commune, GPU document id, file). GPU ids change with each new upload, so
 # the script reports whether each pinned document is still the one in force.
@@ -101,14 +103,16 @@ def page_texts(path: Path) -> list[str]:
         return [page.get_text() for page in document]
 
 
-def ocr_page(path: Path, number: int) -> str:
-    """OCR one page (1-based) in French; results are cached as text files."""
-    cached = CACHE / "ocr" / f"{path.stem}_{number}.txt"
+def ocr_page(path: Path, number: int, rotation: int = 0) -> str:
+    """OCR one page (1-based) in French, optionally turned; results are cached as text files."""
+    suffix = f"_r{rotation}" if rotation else ""
+    cached = CACHE / "ocr" / f"{path.stem}_{number}{suffix}.txt"
     if cached.exists():
         return cached.read_text()
     download(TESSDATA, CACHE / "tessdata" / "fra.traineddata")
     with pymupdf.open(path) as document:
         page = document[number - 1]
+        page.set_rotation((page.rotation + rotation) % 360)
         textpage = page.get_textpage_ocr(
             language="fra", dpi=OCR_DPI, full=True, tessdata=str(CACHE / "tessdata")
         )
@@ -116,6 +120,44 @@ def ocr_page(path: Path, number: int) -> str:
     cached.parent.mkdir(parents=True, exist_ok=True)
     cached.write_text(text)
     return text
+
+
+def rotated_scans() -> None:
+    """Scanned pages turned by 90 degrees: try the four orientations and keep the best one.
+
+    PyMuPDF exposes no Tesseract confidence or orientation detection, so a reading is scored
+    by the share of its words (3 letters or more) that exist in the document's own text layer.
+    """
+    path = corpus_file(*ROTATED[:2])
+    native = page_texts(path)
+    vocabulary = {w for text in native for w in words(text) if len(w) >= 3}
+    rows = []
+    for number, text in enumerate(native, 1):
+        if len(text.strip()) >= EMPTY_PAGE_CHARS:
+            continue
+        scores = {}
+        for rotation in (0, 90, 180, 270):
+            found = [
+                w for w in words(ocr_page(path, number, rotation)) if len(w) >= 3 and w.isalpha()
+            ]
+            scores[rotation] = (
+                sum(w in vocabulary for w in found) / max(1, len(found)),
+                len(found),
+            )
+        best = max(scores, key=lambda r: scores[r][0])
+        rows.append(
+            [
+                number,
+                f"{scores[0][0]:.0%} ({scores[0][1]} words)",
+                best,
+                f"{scores[best][0]:.0%} ({scores[best][1]} words)",
+            ]
+        )
+    table(
+        f"Rotated scans in {ROTATED[1]}: share of OCR words known in the document",
+        ["page", "as stored", "best rotation", "best score"],
+        rows,
+    )
 
 
 def gpu_documents(grid: str) -> list[dict]:
@@ -293,7 +335,7 @@ def annotated_text() -> None:
             "pypdf": pypdf.PdfReader(path).pages[page - 1].extract_text() or "",
             "ocr": ocr_page(path, page),
         }
-        group = ref["label"].split()[0]
+        group = f"{ref['split']} {ref['label'].split()[0]}"
         cells = []
         for extractor, text in outputs.items():
             recall = word_recall(ref["passage"], text)
@@ -303,12 +345,13 @@ def annotated_text() -> None:
             total[1] += recall
             total[2] += 1
             cells.append(f"{'exact' if found else 'no'} {recall:.0%}")
-        rows.append([ref["file"], page, ref["label"], *cells])
-    for group in ("native", "scan"):
+        rows.append([ref["split"], ref["file"], page, ref["label"], *cells])
+    for group in ("dev native", "dev scan", "test native", "test scan"):
         cells = [totals[group, e] for e in ("pymupdf", "pypdf", "ocr")]
         rows.append(
             [
                 f"**total {group}**",
+                "",
                 "",
                 f"{cells[0][2]} passages",
                 *(
@@ -319,7 +362,7 @@ def annotated_text() -> None:
         )
     table(
         "Annotated passages: exact match (same order) and share of words found",
-        ["file", "page", "content", "PyMuPDF", "pypdf", "OCR"],
+        ["split", "file", "page", "content", "PyMuPDF", "pypdf", "OCR"],
         rows,
     )
 
@@ -329,3 +372,4 @@ if __name__ == "__main__":
     corpus()
     extraction()
     annotated_text()
+    rotated_scans()
