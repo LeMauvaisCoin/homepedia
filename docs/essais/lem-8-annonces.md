@@ -36,6 +36,22 @@ utilisateurs. Les indicateurs agrégés d'annonces (carte des loyers,
 observatoires locaux des loyers) restent la seule mesure ouverte de l'offre.
 Crawl4AI n'a pas été utilisé : aucun portail ne le permettait.
 
+## Décision de l'équipe
+
+Le 27 novembre 2026, après cet essai, l'équipe a sorti le scraping de
+portails et les annonces immobilières du périmètre principal (décision notée
+dans [LEM-12](https://linear.app/lemauvaiscoin/issue/LEM-12)). Le socle
+s'appuie sur les données ouvertes : ventes DVF, enrichissements territoriaux et
+indicateurs de loyers d'annonce. [LEM-23](https://linear.app/lemauvaiscoin/issue/LEM-23)
+et [LEM-30](https://linear.app/lemauvaiscoin/issue/LEM-30) restent en bonus
+éventuel, à reprendre uniquement via sources ouvertes ou partenariat. Les
+sections suivantes servent de référence si ce bonus est repris.
+
+Le sujet Epitech (page 3) tolère le scraping de sites qui l'interdisent dans
+leurs CGU, pour un usage académique et non commercial, tout en demandant de
+privilégier les données ouvertes et de documenter les choix de collecte. Cette
+tolérance n'engage pas les portails et ne change pas la décision.
+
 ## Reproduire les mesures
 
 Deux scripts autonomes, lancés avec `uv run`. Ils écrivent leurs tableaux
@@ -196,6 +212,8 @@ Ces trois notions restent séparées dans le modèle de LEM-23 :
 
 ## Recommandation pour LEM-23
 
+À appliquer seulement si le bonus est repris (voir « Décision de l'équipe »).
+
 | Source                           | Mode de collecte                                                         | Limites                                                                                         |
 | -------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
 | Cessions immobilières de l'État  | Crawl hebdomadaire de la liste paginée et des fiches, 3 s entre requêtes | Environ 240 biens publics, souvent atypiques ; prix rarement affiché ; certificat TLS incomplet |
@@ -211,6 +229,8 @@ produit affiche les indicateurs agrégés et les ventes DVF, sans annonces
 privées.
 
 ## Décisions encore ouvertes
+
+À trancher seulement si le bonus est repris.
 
 - Lire dans un navigateur les CGU que les pages anti-robot ont bloquées
   (Leboncoin, SeLoger, Logic-Immo, Figaro, Ouest-France Immo, Superimmo,
